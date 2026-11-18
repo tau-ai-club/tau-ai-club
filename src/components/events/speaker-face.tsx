@@ -18,12 +18,13 @@ export function initialsOf(name: string) {
  * (never a broken image). Decorative: the name is always written next to it.
  * Safe in server and client components.
  */
-export function SpeakerFace({ speaker, size, className }: { speaker: FaceSpeaker; size: number; className?: string }) {
+export function SpeakerFace({ speaker, size, className, pixel }: { speaker: FaceSpeaker; size: number; className?: string; pixel?: boolean }) {
   return (
     <span
       aria-hidden
       className={cn(
-        "relative grid shrink-0 place-items-center overflow-hidden rounded-md border border-border-accent bg-brand-purple-deeper font-bold text-fg",
+        "relative grid shrink-0 place-items-center overflow-hidden bg-brand-purple-deeper font-bold text-fg",
+        pixel ? "pixel-corners [--px:3px]" : "rounded-md border border-border-accent",
         className,
       )}
       style={{ width: size, height: size, fontSize: size * 0.36 }}

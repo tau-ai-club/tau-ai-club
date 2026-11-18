@@ -7,9 +7,24 @@ import { cn } from "@/lib/utils";
  * English is set in Silkscreen caps; Hebrew in Rubik 800 (Silkscreen has no Hebrew).
  * Leading comes after the size in each string: tailwind-merge drops a leading-* that precedes a text-* size.
  */
-export function SectionHeading({ id, locale, line1, line2, className }: { id: string; locale: Locale; line1: string; line2: string; className?: string }) {
+export function SectionHeading({
+  id,
+  locale,
+  line1,
+  line2,
+  as: Tag = "h2",
+  className,
+}: {
+  id?: string;
+  locale: Locale;
+  line1: string;
+  /** Without a second line the title stands alone, closed by the staircase (page titles). */
+  line2?: string;
+  as?: "h1" | "h2";
+  className?: string;
+}) {
   return (
-    <h2
+    <Tag
       id={id}
       data-heading-rise=""
       className={cn(
@@ -22,17 +37,26 @@ export function SectionHeading({ id, locale, line1, line2, className }: { id: st
     >
       {/* Each line sits in a clip box so it can rise into place on scroll (home-motion.tsx). The padding keeps descenders. */}
       <span className="-mb-[0.14em] block overflow-clip pb-[0.14em]">
-        <span data-line className="block">
-          {line1}
-        </span>
+        {line2 ? (
+          <span data-line className="block">
+            {line1}
+          </span>
+        ) : (
+          <span data-line className="flex items-end gap-[0.22em]">
+            <span className="min-w-0 text-balance">{line1}</span>
+            <Steps />
+          </span>
+        )}
       </span>
-      <span className="-mb-[0.14em] block overflow-clip pb-[0.14em]">
-        <span data-line className="flex items-end gap-[0.22em] text-brand-purple-soft">
-          {line2}
-          <Steps />
+      {line2 && (
+        <span className="-mb-[0.14em] block overflow-clip pb-[0.14em]">
+          <span data-line className="flex items-end gap-[0.22em] text-brand-purple-soft">
+            {line2}
+            <Steps />
+          </span>
         </span>
-      </span>
-    </h2>
+      )}
+    </Tag>
   );
 }
 

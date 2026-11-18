@@ -11,7 +11,8 @@ import { getEventContent } from "@/lib/content/data";
 import { WORKSHOP_SECTIONS, bodyFor, hasBody } from "@/lib/content/sections";
 import { formatEventDate, formatTimeRange, isoAttr, loc } from "@/lib/event-format";
 import { Tag } from "@/components/events/event-bits";
-import { MembersSoon, SpeakerList } from "@/components/content/content-bits";
+import { MembersSoon, PageBackdrop, SpeakerList } from "@/components/content/content-bits";
+import { HomeMotion } from "@/components/motion/home-motion";
 import { authEnabled } from "@/lib/supabase/config";
 import { SectionBlock } from "@/components/content/section-block";
 import { MembersEyebrow } from "@/components/members/members-eyebrow";
@@ -43,6 +44,8 @@ export default async function WorkshopPage({ params }: PageProps<"/[locale]/work
   const hebrewOnly = { label: t("hebrewOnly"), hint: t("hebrewOnlyHint") };
 
   return (
+    <div className="relative isolate">
+    <PageBackdrop />
     <article className="mx-auto grid max-w-4xl gap-10 px-4 pt-6 pb-20 sm:px-8 lg:pt-12" data-testid="workshop-page">
       <Link
         href="/workshops"
@@ -56,7 +59,7 @@ export default async function WorkshopPage({ params }: PageProps<"/[locale]/work
         <div className="flex flex-wrap items-center gap-3">
           <MembersEyebrow />
           {event.series_no && total > 0 && <span className="text-sm text-fg-muted">{t("workshopNo", { n: event.series_no, total })}</span>}
-          {event.state === "past" && <Tag>{te("past")}</Tag>}
+          {event.state === "past" && <Tag pixel>{te("past")}</Tag>}
         </div>
         <h1 className="text-[clamp(2rem,6.5vw,3.25rem)] leading-[1.08] font-extrabold text-balance text-fg">{loc(event, "title", l) ?? slug}</h1>
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-fg-muted">
@@ -105,5 +108,7 @@ export default async function WorkshopPage({ params }: PageProps<"/[locale]/work
         </SectionBlock>
       )}
     </article>
+    <HomeMotion />
+    </div>
   );
 }

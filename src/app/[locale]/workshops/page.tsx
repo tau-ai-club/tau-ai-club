@@ -9,10 +9,11 @@ import { getSeason } from "@/lib/events";
 import { hasBody } from "@/lib/content/sections";
 import { formatEventDate, isoAttr, loc } from "@/lib/event-format";
 import { Tag } from "@/components/events/event-bits";
-import { ContentIntro, MembersOnlyMark, MembersSoon, SpeakerList } from "@/components/content/content-bits";
+import { ContentIntro, MembersOnlyMark, MembersSoon, PageBackdrop, SpeakerList } from "@/components/content/content-bits";
+import { PeopleGrid } from "@/components/events/people-grid";
+import { HomeMotion } from "@/components/motion/home-motion";
 import { authEnabled } from "@/lib/supabase/config";
 import { MembersEyebrow } from "@/components/members/members-eyebrow";
-import { cn } from "@/lib/utils";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/workshops">): Promise<Metadata> {
   const { locale } = await params;
@@ -49,29 +50,24 @@ export default async function WorkshopsPage({ params }: PageProps<"/[locale]/wor
   const Forward = l === "he" ? ArrowLeft : ArrowRight;
 
   return (
-    <div className="mx-auto grid max-w-site gap-10 px-4 pt-10 pb-20 sm:px-8 lg:pt-14" data-testid="workshops-page">
-      <ContentIntro eyebrow={<MembersEyebrow />} title={t("workshopsTitle")} body={t("workshopsBody")} />
+    <div className="relative isolate">
+    <PageBackdrop />
+    <div className="mx-auto grid max-w-site gap-12 px-4 pt-10 pb-20 sm:px-8 lg:pt-14" data-testid="workshops-page">
+      <ContentIntro locale={l} eyebrow={<MembersEyebrow />} title={t("workshopsTitle")} body={t("workshopsBody")} />
       {!authOn && <MembersSoon title={t("soonTitle")} body={t("soonBodyWorkshop")} />}
       {workshops.length === 0 ? (
         <p className="text-fg-subtle">{t("workshopsEmpty")}</p>
       ) : (
-        <ol className="grid gap-4 md:grid-cols-3">
+        <PeopleGrid>
           {workshops.map((w, i) => (
-            <li key={w.slug}>
-              <article
-                className={cn(
-                  "relative grid h-full content-start gap-3 rounded-lg border bg-surface p-5 transition-colors duration-150 hover:border-border-accent sm:p-6",
-                  w.state === "past" ? "border-border" : "border-border-accent",
-                )}
-                data-testid="workshop-card"
-              >
+            <li key={w.slug} data-testid="workshop-card" data-tilt="" className="group relative grid min-w-0 content-start gap-3 p-5 sm:p-6">
                 <div className="flex flex-wrap items-center gap-2 text-sm text-fg-muted">
                   <span>{t("workshopNo", { n: w.series_no ?? i + 1, total: workshops.length })}</span>
-                  {w.state === "past" && <Tag>{te("past")}</Tag>}
-                  {(w.state === "next" || w.state === "live") && <Tag tone="next">{te(w.state === "live" ? "happeningNow" : "next")}</Tag>}
+                  {w.state === "past" && <Tag pixel>{te("past")}</Tag>}
+                  {(w.state === "next" || w.state === "live") && <Tag pixel tone="next">{te(w.state === "live" ? "happeningNow" : "next")}</Tag>}
                 </div>
-                <h2 className="text-xl font-bold text-balance text-fg">
-                  <Link href={`/workshops/${w.slug}`} className="rounded-sm after:absolute after:inset-0 after:rounded-lg">
+                <h2 className="text-xl font-bold text-balance text-fg transition-colors duration-150 group-hover:text-brand-purple-soft">
+                  <Link href={`/workshops/${w.slug}`} className="rounded-sm after:absolute after:inset-0">
                     {loc(w, "title", l) ?? w.slug}
                   </Link>
                 </h2>
@@ -89,12 +85,13 @@ export default async function WorkshopsPage({ params }: PageProps<"/[locale]/wor
                   {t("workshopsTitle")}
                   <Forward className="size-4" />
                 </span>
-              </article>
             </li>
           ))}
-        </ol>
+        </PeopleGrid>
       )}
       <MembersOnlyMark label={t("membersOnlyBadge")} />
+    </div>
+    <HomeMotion />
     </div>
   );
 }

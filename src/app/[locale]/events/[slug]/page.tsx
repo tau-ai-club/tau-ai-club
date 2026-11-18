@@ -22,6 +22,7 @@ import { alternatesFor, shareMetadata } from "@/lib/seo";
 import { eventJsonLd, jsonLdHtml } from "@/lib/structured-data";
 import { cn } from "@/lib/utils";
 import { EventActions, Tag } from "@/components/events/event-bits";
+import { HomeMotion } from "@/components/motion/home-motion";
 import { ChipSep, FlyerChip, InfoTile, PixelCluster, SpeakerAvatar, splitTitle } from "@/components/events/flyer-bits";
 import { SpeakerLinkedIn } from "@/components/events/speaker-linkedin";
 import { SpeakerContactLinks } from "@/components/events/speaker-contact-links";
@@ -227,7 +228,7 @@ export default async function EventPage({ params }: PageProps<"/[locale]/events/
                   const solo = speakers.length === 1;
                   return (
                     <li key={sp.key} data-testid="event-speaker" className="flex items-center gap-4 sm:gap-5">
-                      <SpeakerAvatar name={sp.name} photoUrl={sp.photoUrl} company={sp.company} size={solo ? 96 : 80} muted={past} />
+                      <SpeakerAvatar pixel name={sp.name} photoUrl={sp.photoUrl} company={sp.company} size={solo ? 96 : 80} muted={past} />
                       <div className="min-w-0">
                         <p className={cn("leading-tight font-bold text-balance text-fg", solo ? "text-[clamp(1.5rem,4vw,2rem)]" : "text-xl")}>
                           {sp.name}
@@ -325,11 +326,11 @@ export default async function EventPage({ params }: PageProps<"/[locale]/events/
 
         {/* ---------- Previous / next meetup ---------- */}
         {(prev || next) && (
-          <nav aria-label={t("seasonNav")} className="mt-16 grid gap-3 border-t border-border pt-8 sm:grid-cols-2 lg:mt-24">
+          <nav aria-label={t("seasonNav")} data-build="" className="cell-grid mt-16 sm:grid-cols-2 lg:mt-24">
             {prev ? (
               <Link
                 href={`/events/${prev.slug}`}
-                className="group grid gap-1 rounded-lg border border-border p-4 transition-colors duration-150 hover:border-border-strong hover:bg-surface"
+                className="group grid gap-1 p-4 transition-colors duration-150 hover:bg-surface sm:p-5"
               >
                 <span className="inline-flex items-center gap-1.5 text-sm text-fg-subtle">
                   <Back aria-hidden className="size-4" />
@@ -341,12 +342,12 @@ export default async function EventPage({ params }: PageProps<"/[locale]/events/
                 </bdi>
               </Link>
             ) : (
-              <span className="hidden sm:block" />
+              <span aria-hidden className="hidden sm:block" />
             )}
             {next && (
               <Link
                 href={`/events/${next.slug}`}
-                className="group grid justify-items-end gap-1 rounded-lg border border-border p-4 text-end transition-colors duration-150 hover:border-border-strong hover:bg-surface"
+                className="group grid justify-items-end gap-1 p-4 text-end transition-colors duration-150 hover:bg-surface sm:p-5"
               >
                 <span className="inline-flex items-center gap-1.5 text-sm text-fg-subtle">
                   {t("nextMeetup")}
@@ -361,6 +362,7 @@ export default async function EventPage({ params }: PageProps<"/[locale]/events/
           </nav>
         )}
       </article>
+      <HomeMotion />
     </div>
   );
 }

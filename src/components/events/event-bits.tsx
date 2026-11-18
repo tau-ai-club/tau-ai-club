@@ -17,7 +17,7 @@ import { SITE_URL } from "@/config/site";
 type TagTone = "next" | "tentative" | "tbd" | "neutral";
 
 /** Status tag. State is always written in text, never shown by color alone. */
-export function Tag({ children, tone = "neutral" }: { children: React.ReactNode; tone?: TagTone }) {
+export function Tag({ children, tone = "neutral", pixel }: { children: React.ReactNode; tone?: TagTone; pixel?: boolean }) {
   return (
     <span
       className={cn(
@@ -25,6 +25,7 @@ export function Tag({ children, tone = "neutral" }: { children: React.ReactNode;
         tone === "next" && "tag-next",
         tone === "tentative" && "tag-tentative",
         tone === "tbd" && "tag-tbd",
+        pixel && "rounded-none",
       )}
     >
       {children}

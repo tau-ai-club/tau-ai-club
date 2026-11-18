@@ -12,7 +12,8 @@ import { markdownToText } from "@/lib/content/markdown";
 import { formatEventDate, formatTimeRange, isoAttr, loc, speakerNames } from "@/lib/event-format";
 import { alternatesFor, shareMetadata } from "@/lib/seo";
 import { Tag } from "@/components/events/event-bits";
-import { Eyebrow, MembersOnlyMark, MembersSoon, SpeakerList } from "@/components/content/content-bits";
+import { Eyebrow, MembersOnlyMark, MembersSoon, PageBackdrop, SpeakerList } from "@/components/content/content-bits";
+import { HomeMotion } from "@/components/motion/home-motion";
 import { authEnabled } from "@/lib/supabase/config";
 import { requireMember } from "@/lib/auth/viewer";
 import { SectionBlock } from "@/components/content/section-block";
@@ -81,6 +82,8 @@ export default async function LecturePage({ params }: PageProps<"/[locale]/lectu
   const membersOrder = LECTURE_SECTIONS.filter((s) => s !== "blurb");
 
   return (
+    <div className="relative isolate">
+    <PageBackdrop />
     <article className="mx-auto grid max-w-4xl gap-10 px-4 pt-6 pb-20 sm:px-8 lg:pt-12" data-testid="lecture-page" data-state={event.state}>
       <Link
         href="/lectures"
@@ -93,7 +96,7 @@ export default async function LecturePage({ params }: PageProps<"/[locale]/lectu
       <header className="grid gap-5">
         <div className="flex flex-wrap items-center gap-3">
           <Eyebrow he="הרצאה" en="Lecture" />
-          {event.state === "past" && <Tag>{te("past")}</Tag>}
+          {event.state === "past" && <Tag pixel>{te("past")}</Tag>}
         </div>
         <h1 className="text-[clamp(2rem,6.5vw,3.25rem)] leading-[1.08] font-extrabold text-balance text-fg">{title}</h1>
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-fg-muted">
@@ -130,5 +133,7 @@ export default async function LecturePage({ params }: PageProps<"/[locale]/lectu
         )}
       </div>
     </article>
+    <HomeMotion />
+    </div>
   );
 }

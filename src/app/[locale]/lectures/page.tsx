@@ -12,8 +12,9 @@ import { markdownToText } from "@/lib/content/markdown";
 import { formatEventDate, isoAttr, loc } from "@/lib/event-format";
 import { alternatesFor, shareMetadata } from "@/lib/seo";
 import { Tag } from "@/components/events/event-bits";
-import { ContentIntro, Eyebrow, SpeakerList } from "@/components/content/content-bits";
-import { cn } from "@/lib/utils";
+import { ContentIntro, Eyebrow, PageBackdrop, SpeakerList } from "@/components/content/content-bits";
+import { PeopleGrid } from "@/components/events/people-grid";
+import { HomeMotion } from "@/components/motion/home-motion";
 import { authEnabled } from "@/lib/supabase/config";
 import { requireMember } from "@/lib/auth/viewer";
 
@@ -59,20 +60,13 @@ export default async function LecturesPage({ params }: PageProps<"/[locale]/lect
     const blurb = sections[e.slug]?.blurb;
     const blurbText = blurb ? markdownToText((l === "en" ? blurb.body_en : null) || blurb.body_he) : null;
     return (
-      <li key={e.slug}>
-        <article
-          className={cn(
-            "relative grid gap-4 rounded-lg border bg-surface p-5 transition-colors duration-150 hover:border-border-accent sm:p-6",
-            e.state === "past" ? "border-border" : "border-border-accent",
-          )}
-          data-testid="lecture-card"
-        >
+      <li key={e.slug} data-testid="lecture-card" data-tilt="" className="group relative grid min-w-0 content-start gap-4 p-5 sm:p-6">
           <div className="flex flex-wrap items-center gap-2 text-sm text-fg-muted">
             <time dateTime={isoAttr(e.starts_at)}>{formatEventDate(e.starts_at, l)}</time>
-            {e.state === "past" ? <Tag>{te("past")}</Tag> : <Tag tone={e.state === "next" || e.state === "live" ? "next" : "neutral"}>{t("upcoming")}</Tag>}
+            {e.state === "past" ? <Tag pixel>{te("past")}</Tag> : <Tag pixel tone={e.state === "next" || e.state === "live" ? "next" : "neutral"}>{t("upcoming")}</Tag>}
           </div>
-          <h3 className="text-xl font-bold text-balance text-fg sm:text-2xl">
-            <Link href={`/lectures/${e.slug}`} className="rounded-sm after:absolute after:inset-0 after:rounded-lg">
+          <h3 className="text-xl font-bold text-balance text-fg transition-colors duration-150 group-hover:text-brand-purple-soft sm:text-2xl">
+            <Link href={`/lectures/${e.slug}`} className="rounded-sm after:absolute after:inset-0">
               {title}
             </Link>
           </h3>
@@ -88,31 +82,34 @@ export default async function LecturesPage({ params }: PageProps<"/[locale]/lect
             {t("readLecture")}
             <Forward className="size-4" />
           </span>
-        </article>
       </li>
     );
   };
 
   return (
-    <div className="mx-auto grid max-w-site gap-10 px-4 pt-10 pb-20 sm:px-8 lg:pt-14" data-testid="lectures-page">
-      <ContentIntro eyebrow={<Eyebrow he="מחזור 02" en="Cohort 02" />} title={t("lecturesTitle")} body={t("lecturesBody")} />
+    <div className="relative isolate">
+    <PageBackdrop />
+    <div className="mx-auto grid max-w-site gap-12 px-4 pt-10 pb-20 sm:px-8 lg:pt-14" data-testid="lectures-page">
+      <ContentIntro locale={l} eyebrow={<Eyebrow he="מחזור 02" en="Cohort 02" />} title={t("lecturesTitle")} body={t("lecturesBody")} />
       {lectures.length === 0 && <p className="text-fg-subtle">{t("lecturesEmpty")}</p>}
       {past.length > 0 && (
-        <section aria-labelledby="past-lectures" className="grid gap-4">
+        <section aria-labelledby="past-lectures">
           <h2 id="past-lectures" className="text-lg font-bold text-fg-muted">
             {t("past")}
           </h2>
-          <ul className="grid gap-4 lg:grid-cols-2">{past.map(card)}</ul>
+          <PeopleGrid>{past.map(card)}</PeopleGrid>
         </section>
       )}
       {coming.length > 0 && (
-        <section aria-labelledby="coming-lectures" className="grid gap-4">
+        <section aria-labelledby="coming-lectures">
           <h2 id="coming-lectures" className="text-lg font-bold text-fg-muted">
             {t("upcoming")}
           </h2>
-          <ul className="grid gap-4 lg:grid-cols-2">{coming.map(card)}</ul>
+          <PeopleGrid>{coming.map(card)}</PeopleGrid>
         </section>
       )}
+    </div>
+    <HomeMotion />
     </div>
   );
 }

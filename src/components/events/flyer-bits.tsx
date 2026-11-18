@@ -96,6 +96,7 @@ export function SpeakerAvatar({
   company,
   size,
   muted,
+  pixel,
   className,
 }: {
   name: string;
@@ -103,11 +104,29 @@ export function SpeakerAvatar({
   company?: string | null;
   size: number;
   muted?: boolean;
+  /** Square photo in a purple frame cut on pixel steps (inner pages); the home's Next event card keeps the round ring. */
+  pixel?: boolean;
   className?: string;
 }) {
   const ring = size >= 64 ? 3 : 2;
   const gap = size >= 64 ? 4 : 3;
   const badge = Math.max(22, Math.round(size * 0.3));
+  if (pixel) {
+    return (
+      <span aria-hidden className={cn("relative block shrink-0", className)} style={{ width: size, height: size }}>
+        <span className={cn("pixel-corners absolute inset-0 p-[3px]", muted ? "bg-brand-purple-deeper" : "bg-brand-purple")}>
+          <span className="pixel-corners relative grid size-full place-items-center overflow-hidden bg-brand-purple-deeper font-bold text-fg [--px:3px]">
+            {photoUrl ? (
+              <Image src={photoUrl} alt="" fill sizes={`${size}px`} className={cn("object-cover", muted && "opacity-80")} />
+            ) : (
+              <span style={{ fontSize: Math.round(size * 0.32) }}>{initialsOf(name)}</span>
+            )}
+          </span>
+        </span>
+        {company && size >= 56 && <CompanyBadge company={company} size={badge} />}
+      </span>
+    );
+  }
   return (
     <span aria-hidden className={cn("relative block shrink-0", className)} style={{ width: size, height: size }}>
       <span
