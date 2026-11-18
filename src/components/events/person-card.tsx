@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import type { Locale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,8 @@ export function PersonCard({
   role,
   linkedinUrl,
   testId,
+  style,
+  ...gridProps
 }: {
   locale: Locale;
   name: string;
@@ -26,9 +29,13 @@ export function PersonCard({
   role: string | null;
   linkedinUrl: string | null;
   testId: string;
+  /** Set by PeopleGrid. */
+  style?: CSSProperties;
+  "data-lead"?: string;
+  "data-wide"?: string;
 }) {
   return (
-    <li data-testid={testId} data-tilt="" className="relative flex min-w-0 flex-col p-4 sm:p-5 lg:p-6">
+    <li data-testid={testId} data-tilt="" style={style} {...gridProps} className="relative flex min-w-0 flex-col p-4 sm:p-5 lg:p-6">
       <div className="flex items-start justify-between gap-2">
         <PixelPortrait name={name} photoUrl={photoUrl} company={company} />
         <SpeakerLinkedIn url={linkedinUrl} name={name} className="-me-2 -mt-2" />
@@ -62,21 +69,4 @@ function PixelPortrait({ name, photoUrl, company }: { name: string; photoUrl: st
       {company && <CompanyBadge company={company} size={28} />}
     </span>
   );
-}
-
-/**
- * Empty cells that close the last row of a person grid, so the grid ends square. Decorative.
- * `n` people in 2 columns on phones and 4 from lg.
- */
-export function GridFill({ n }: { n: number }) {
-  const sm = (2 - (n % 2)) % 2;
-  const lg = (4 - (n % 4)) % 4;
-  return Array.from({ length: Math.max(sm, lg) }, (_, i) => (
-    <li
-      key={i}
-      aria-hidden
-      className={cn(i < sm ? "block" : "hidden", i < lg ? "lg:block" : "lg:hidden")}
-      style={{ backgroundImage: "repeating-conic-gradient(var(--logo-grid) 0 25%, transparent 0 50%)", backgroundSize: "16px 16px" }}
-    />
-  ));
 }

@@ -3,7 +3,8 @@ import type { Locale } from "@/i18n/routing";
 import type { ClubEvent, Speaker } from "@/lib/data/types";
 import { loc } from "@/lib/event-format";
 import { SectionHeading } from "@/components/home/section-heading";
-import { GridFill, PersonCard } from "./person-card";
+import { PeopleGrid } from "./people-grid";
+import { PersonCard } from "./person-card";
 
 /**
  * "Meet our speakers", after the club's Instagram post: each speaker once, in the order they
@@ -20,7 +21,7 @@ export async function SeasonSpeakers({ events, locale }: { events: ClubEvent[]; 
   return (
     <section aria-labelledby="season-speakers-heading" data-testid="season-speakers" className="mx-auto max-w-site px-4 pt-20 sm:px-8 lg:pt-28">
       <SectionHeading id="season-speakers-heading" locale={locale} line1={t("speakersLine1")} line2={t("speakersLine2")} />
-      <ul data-build="" className="cell-grid mt-10 grid-cols-2 lg:grid-cols-4">
+      <PeopleGrid>
         {people.map((sp) => (
           <PersonCard
             key={sp.id}
@@ -33,8 +34,7 @@ export async function SeasonSpeakers({ events, locale }: { events: ClubEvent[]; 
             linkedinUrl={sp.linkedin_url}
           />
         ))}
-        <GridFill n={people.length} />
-      </ul>
+      </PeopleGrid>
     </section>
   );
 }

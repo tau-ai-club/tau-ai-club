@@ -267,6 +267,47 @@
   .cell-grid > * {
     background: var(--bg);
   }
+  /* People grids (PeopleGrid): 2 columns on phones, a lone last cell spans the row. From lg the grid has
+     2 x --cols tracks, cells span 2, and a short last row starts at --lead so it sits centred.
+     The two [data-pad] cells paint the empty ends of that row in the page colour (negative margins
+     cover the outer frame), so no grid line is left dangling. */
+  .people-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .people-grid > [data-wide] {
+    grid-column: 1 / -1;
+  }
+  .people-grid > [data-pad] {
+    display: none;
+  }
+  @media (min-width: 64rem) {
+    .people-grid {
+      grid-template-columns: repeat(calc(var(--cols) * 2), minmax(0, 1fr));
+    }
+    .people-grid > li {
+      grid-column: span 2;
+    }
+    .people-grid > [data-wide] {
+      grid-column: span 2;
+    }
+    .people-grid > [data-lead] {
+      grid-column: var(--lead) / span 2;
+    }
+    .people-grid > [data-pad] {
+      display: block;
+      grid-row: var(--row);
+    }
+    .people-grid > [data-pad="start"] {
+      grid-column: 1 / span var(--pad);
+      margin-block-end: -1px;
+      margin-inline-start: -1px;
+    }
+    .people-grid > [data-pad="end"] {
+      grid-column: calc(var(--cols) * 2 - var(--pad) + 1) / span var(--pad);
+      margin-block-end: -1px;
+      margin-inline-end: -1px;
+    }
+  }
   /* Pointer spotlight (home-motion.tsx, mouse only): the grid lines near the cursor turn purple. */
   .cell-grid[data-spot] {
     background:

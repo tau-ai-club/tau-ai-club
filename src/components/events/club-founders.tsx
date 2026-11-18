@@ -3,7 +3,8 @@ import type { Locale } from "@/i18n/routing";
 import type { TeamMember } from "@/lib/data/types";
 import { loc } from "@/lib/event-format";
 import { SectionHeading } from "@/components/home/section-heading";
-import { GridFill, PersonCard } from "./person-card";
+import { PeopleGrid } from "./people-grid";
+import { PersonCard } from "./person-card";
 
 /**
  * "Meet the club's founders", after the club's "Meet our managers" post. Same cards as the
@@ -17,7 +18,7 @@ export async function ClubFounders({ team, locale }: { team: TeamMember[]; local
   return (
     <section aria-labelledby="club-founders-heading" data-testid="club-founders" className="mx-auto max-w-site px-4 pt-20 sm:px-8 lg:pt-28">
       <SectionHeading id="club-founders-heading" locale={locale} line1={t("foundersLine1")} line2={t("foundersLine2")} />
-      <ul data-build="" className="cell-grid mt-10 grid-cols-2 lg:grid-cols-4">
+      <PeopleGrid>
         {team.map((m) => (
           <PersonCard
             key={m.id}
@@ -30,8 +31,7 @@ export async function ClubFounders({ team, locale }: { team: TeamMember[]; local
             linkedinUrl={m.linkedin_url}
           />
         ))}
-        <GridFill n={team.length} />
-      </ul>
+      </PeopleGrid>
     </section>
   );
 }
