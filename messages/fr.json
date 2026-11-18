@@ -8,6 +8,7 @@
   "nav": {
     "label": "Principal",
     "home": "Accueil",
+    "language": "Langue / שפה",
     "switchLanguage": "עברית",
     "switchLanguageLabel": "החלפה לעברית",
     "skipToContent": "Aller au contenu",
