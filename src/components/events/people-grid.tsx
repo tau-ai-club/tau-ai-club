@@ -20,7 +20,7 @@ export function PeopleGrid({ children, stack = false, maxCols }: { children: Rea
       {items.map((el, i) => {
         const extra: Placeable = {};
         if (pad > 0 && i === leadIndex) extra["data-lead"] = "";
-        if (!stack && n % 2 === 1 && i === n - 1) extra["data-wide"] = ""; // phones: a lone last cell spans the row
+        if (n % 2 === 1 && i === n - 1) extra["data-wide"] = ""; // below lg: a lone last cell spans the row (harmless in the 1-column stack)
         return Object.keys(extra).length ? cloneElement(el, extra) : el;
       })}
       {/* Masks the grid-line colour beside a centred short row; hidden on phones. */}
