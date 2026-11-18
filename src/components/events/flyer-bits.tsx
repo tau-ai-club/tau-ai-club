@@ -182,7 +182,7 @@ export function CornerBrackets({ className }: { className?: string }) {
 }
 
 /** The square badge on a photo's corner: the company's logo on white, else its initial. */
-function CompanyBadge({ company, size }: { company: string; size: number }) {
+export function CompanyBadge({ company, size }: { company: string; size: number }) {
   const logo = companyLogo(company);
   const box = "absolute -end-[3%] bottom-[2%] grid place-items-center overflow-hidden rounded-[7px] border-2";
   if (logo && "stealth" in logo) {

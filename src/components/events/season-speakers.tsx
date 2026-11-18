@@ -2,13 +2,12 @@ import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import type { ClubEvent, Speaker } from "@/lib/data/types";
 import { loc } from "@/lib/event-format";
-import { cn } from "@/lib/utils";
-import { CornerBrackets, FlyerChip } from "./flyer-bits";
-import { PersonCard } from "./person-card";
+import { SectionHeading } from "@/components/home/section-heading";
+import { GridFill, PersonCard } from "./person-card";
 
 /**
  * "Meet our speakers", after the club's Instagram post: each speaker once, in the order they
- * first appear in the season. Round photo with a purple ring, name, company, role in small caps.
+ * first appear in the season, in cells of the logo grid.
  * Public fields only.
  */
 export async function SeasonSpeakers({ events, locale }: { events: ClubEvent[]; locale: Locale }) {
@@ -17,47 +16,25 @@ export async function SeasonSpeakers({ events, locale }: { events: ClubEvent[]; 
   if (seen.size === 0) return null;
   const t = await getTranslations({ locale, namespace: "home" });
 
+  const people = [...seen.values()];
   return (
-    <section aria-labelledby="season-speakers-heading" data-testid="season-speakers" className="relative mx-auto max-w-site px-4 pt-20 sm:px-8 lg:pt-28">
-      <div className="relative isolate px-0 py-10 sm:px-8 sm:py-12">
-        {/* The post's frame: logo grid fading out, corner brackets. Decorative. */}
-        <div aria-hidden className="hero-grid absolute inset-0 -z-10 opacity-60 [mask-image:radial-gradient(70%_60%_at_50%_40%,var(--bg),transparent)]" />
-        <CornerBrackets className="inset-0 hidden sm:block" />
-
-        <div className="grid gap-4">
-          <FlyerChip locale={locale}>{t("seasonSpeakers")}</FlyerChip>
-          <h2
-            id="season-speakers-heading"
-            className={cn(
-              "grid leading-[0.95] text-fg",
-              locale === "en"
-                ? "font-pixel text-[clamp(2.25rem,7vw,4rem)] tracking-[0.02em] uppercase"
-                : "text-[clamp(2.25rem,7vw,3.75rem)] font-extrabold tracking-[-0.01em]",
-            )}
-          >
-            <span>{t("speakersLine1")}</span>
-            <span className="flex items-center gap-[0.25em] text-brand-purple">
-              {t("speakersLine2")}
-              {locale === "he" && <span aria-hidden className="mt-[0.1em] size-[0.28em] shrink-0 bg-brand-purple" />}
-            </span>
-          </h2>
-        </div>
-
-        <ul className="mt-8 flex flex-wrap justify-center gap-3 lg:gap-4">
-          {[...seen.values()].map((sp) => (
-            <PersonCard
-              key={sp.id}
-              testId="season-speaker"
-              locale={locale}
-              name={loc(sp, "name", locale) ?? ""}
-              photoUrl={sp.photo_url}
-              company={loc(sp, "company", locale)}
-              role={loc(sp, "role", locale)}
-              linkedinUrl={sp.linkedin_url}
-            />
-          ))}
-        </ul>
-      </div>
+    <section aria-labelledby="season-speakers-heading" data-testid="season-speakers" className="mx-auto max-w-site px-4 pt-20 sm:px-8 lg:pt-28">
+      <SectionHeading id="season-speakers-heading" locale={locale} line1={t("speakersLine1")} line2={t("speakersLine2")} />
+      <ul className="cell-grid mt-10 grid-cols-2 lg:grid-cols-4">
+        {people.map((sp) => (
+          <PersonCard
+            key={sp.id}
+            testId="season-speaker"
+            locale={locale}
+            name={loc(sp, "name", locale) ?? ""}
+            photoUrl={sp.photo_url}
+            company={loc(sp, "company", locale)}
+            role={loc(sp, "role", locale)}
+            linkedinUrl={sp.linkedin_url}
+          />
+        ))}
+        <GridFill n={people.length} />
+      </ul>
     </section>
   );
 }

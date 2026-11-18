@@ -239,6 +239,70 @@
   .hero-glow {
     background: var(--glow-hero), var(--glow-hero-2);
   }
+
+  /*
+   * Pixel-builder pass (home). Stepped corners cut from the logo's blocks: every corner loses
+   * a 2-step staircase instead of a curve. --px is one "pixel" of the cut.
+   */
+  .pixel-corners {
+    --px: 4px;
+    clip-path: polygon(
+      0 calc(var(--px) * 2), var(--px) calc(var(--px) * 2), var(--px) var(--px), calc(var(--px) * 2) var(--px), calc(var(--px) * 2) 0,
+      calc(100% - var(--px) * 2) 0, calc(100% - var(--px) * 2) var(--px), calc(100% - var(--px)) var(--px), calc(100% - var(--px)) calc(var(--px) * 2), 100% calc(var(--px) * 2),
+      100% calc(100% - var(--px) * 2), calc(100% - var(--px)) calc(100% - var(--px) * 2), calc(100% - var(--px)) calc(100% - var(--px)), calc(100% - var(--px) * 2) calc(100% - var(--px)), calc(100% - var(--px) * 2) 100%,
+      calc(var(--px) * 2) 100%, calc(var(--px) * 2) calc(100% - var(--px)), var(--px) calc(100% - var(--px)), var(--px) calc(100% - var(--px) * 2), 0 calc(100% - var(--px) * 2)
+    );
+  }
+  .pixel-corners-lg {
+    --px: 6px;
+  }
+
+  /* The logo grid as layout: cells sit on the border colour with a 1px gap, like the logo's grid. */
+  .cell-grid {
+    display: grid;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .cell-grid > * {
+    background: var(--bg);
+  }
+
+  /* The hero band's caret: a solid block the height of a Silkscreen cap. */
+  .pixel-caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 0.78em;
+    margin-inline-start: 0.12em;
+    background: var(--brand-purple);
+    vertical-align: -0.04em;
+  }
+}
+
+/*
+ * The page's one authored motion: the hero mosaic is laid block by block, bottom row first,
+ * then the caret blinks a few times and stops (no endless motion). Static under reduced motion
+ * and after the first view in a session.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-intro-seen]) .mosaic-block {
+    animation: block-in 320ms var(--ease-out) both;
+    animation-delay: calc(var(--d, 0) * 38ms + 200ms);
+  }
+  html:not([data-intro-seen]) .pixel-caret {
+    animation: caret-blink 1s steps(1, end) 1.2s 4;
+  }
+}
+@keyframes block-in {
+  from {
+    opacity: 0.01;
+    transform: translateY(-8px);
+  }
+}
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
 }
 
 /*

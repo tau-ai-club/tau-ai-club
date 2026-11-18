@@ -1,12 +1,14 @@
+import Image from "next/image";
 import type { Locale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
-import { SpeakerAvatar, roleCapsClass } from "./flyer-bits";
+import { CompanyBadge, roleCapsClass } from "./flyer-bits";
+import { initialsOf } from "./speaker-face";
 import { SpeakerLinkedIn } from "./speaker-linkedin";
 
 /**
- * One person in a "Meet our ..." grid (season speakers, club founders), after the club's
- * Instagram posts: ringed round photo, name, company, role in small caps, LinkedIn.
- * Public fields only. Server-rendered, no motion.
+ * One person in a "Meet our ..." grid (season speakers, club founders): a cell of the page's
+ * logo grid with a square portrait cut on pixel steps, the company logo badge (docs/DECISIONS.md),
+ * name, company and role. Public fields only. Server-rendered, no motion.
  */
 export function PersonCard({
   locale,
@@ -26,20 +28,55 @@ export function PersonCard({
   testId: string;
 }) {
   return (
-    <li
-      data-testid={testId}
-      className="relative flex w-[calc(50%-0.375rem)] flex-col items-center rounded-lg border border-border-accent bg-bg-raised px-3 pt-6 pb-4 text-center shadow-[var(--highlight-top)] lg:w-[calc(25%-0.75rem)]"
-    >
-      <span aria-hidden className="absolute -top-px inset-x-[14%] h-[3px] rounded-b-[3px] bg-brand-purple" />
-      <SpeakerAvatar name={name} photoUrl={photoUrl} company={company} size={88} />
-      <p className="mt-4 leading-tight font-bold text-fg lg:text-lg">{name}</p>
+    <li data-testid={testId} className="relative flex min-w-0 flex-col p-4 sm:p-5 lg:p-6">
+      <div className="flex items-start justify-between gap-2">
+        <PixelPortrait name={name} photoUrl={photoUrl} company={company} />
+        <SpeakerLinkedIn url={linkedinUrl} name={name} className="-me-2 -mt-2" />
+      </div>
+      <p className="mt-4 leading-tight font-bold text-pretty text-fg lg:text-lg">{name}</p>
       {company && (
         <p className="mt-1 text-sm text-fg-muted">
           <bdi>{company}</bdi>
         </p>
       )}
-      {role && <p className={cn("mt-1.5 text-balance", roleCapsClass(locale))}>{role}</p>}
-      <SpeakerLinkedIn url={linkedinUrl} name={name} className="mt-2" />
+      {role && <p className={cn("mt-2 text-pretty", roleCapsClass(locale))}>{role}</p>}
     </li>
   );
+}
+
+const SIZE = 88; // source photos are 96px; never upscale past that
+
+/** Square photo inside a purple frame, both cut on pixel steps. Decorative: the name is written next to it. */
+function PixelPortrait({ name, photoUrl, company }: { name: string; photoUrl: string | null; company: string | null }) {
+  return (
+    <span aria-hidden className="relative block shrink-0" style={{ width: SIZE, height: SIZE }}>
+      <span className="pixel-corners absolute inset-0 bg-brand-purple p-[3px]">
+        <span className="pixel-corners relative grid size-full place-items-center overflow-hidden bg-brand-purple-deeper font-bold text-fg [--px:3px]">
+          {photoUrl ? (
+            <Image src={photoUrl} alt="" fill sizes={`${SIZE}px`} className="object-cover" />
+          ) : (
+            <span style={{ fontSize: Math.round(SIZE * 0.32) }}>{initialsOf(name)}</span>
+          )}
+        </span>
+      </span>
+      {company && <CompanyBadge company={company} size={28} />}
+    </span>
+  );
+}
+
+/**
+ * Empty cells that close the last row of a person grid, so the grid ends square. Decorative.
+ * `n` people in 2 columns on phones and 4 from lg.
+ */
+export function GridFill({ n }: { n: number }) {
+  const sm = (2 - (n % 2)) % 2;
+  const lg = (4 - (n % 4)) % 4;
+  return Array.from({ length: Math.max(sm, lg) }, (_, i) => (
+    <li
+      key={i}
+      aria-hidden
+      className={cn(i < sm ? "block" : "hidden", i < lg ? "lg:block" : "lg:hidden")}
+      style={{ backgroundImage: "repeating-conic-gradient(var(--logo-grid) 0 25%, transparent 0 50%)", backgroundSize: "16px 16px" }}
+    />
+  ));
 }

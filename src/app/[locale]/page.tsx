@@ -11,7 +11,7 @@ import { SeasonTimeline } from "@/components/events/season-timeline";
 import { SeasonSpeakers } from "@/components/events/season-speakers";
 import { ClubFounders } from "@/components/events/club-founders";
 import { ClubAbout } from "@/components/home/club-about";
-import { PageBackdrop } from "@/components/site/page-backdrop";
+import { PixelMosaic } from "@/components/home/pixel-mosaic";
 import { authEnabled } from "@/lib/supabase/config";
 
 // ISR: re-render at most every 5 minutes (see PUBLIC_REVALIDATE_SECONDS in config/site.ts;
@@ -31,12 +31,13 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   setRequestLocale(locale);
   const l = locale as Locale;
 
-  const [season, team, t, te, tm] = await Promise.all([
+  const [season, team, t, te, tm, tf] = await Promise.all([
     getSeason(),
     getTeam(),
     getTranslations("home"),
     getTranslations("errors"),
     getTranslations("meta"),
+    getTranslations("footer"),
   ]);
   const orgJsonLd = organizationJsonLd(l, { name: tm("siteName"), description: tm("description") });
   const cohort = season.status === "ok" ? season.cohort : null;
@@ -51,47 +52,66 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   return (
     <div className="relative isolate">
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdHtml(orgJsonLd)} />
-      <PageBackdrop />
+      {/* Backdrop: the logo grid, fading out. Decorative, static. */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-16 -z-10 h-[40rem] overflow-hidden">
+        <div className="hero-grid absolute inset-0 opacity-50" />
+      </div>
 
-      <div className={cn(
-          "mx-auto grid max-w-site gap-7 px-4 pt-6 sm:px-8 lg:items-end lg:gap-14 lg:pt-16",
-          showSchedule && "lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]",
-        )}>
+      <div
+        className={cn(
+          "mx-auto grid max-w-site gap-8 px-4 pt-8 sm:px-8 lg:gap-12 lg:pt-14",
+          showSchedule ? "lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-end" : "lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end",
+        )}
+      >
         <section aria-labelledby="hero-heading">
+          {cohort && (
+            <p className="intro flex w-fit items-stretch border border-border-accent text-[0.6875rem] leading-none [--i:0]">
+              <span lang="en" className="bg-brand-purple px-2.5 py-2 font-pixel tracking-[0.18em] text-on-purple uppercase">
+                {cohort.name_en}
+              </span>
+              <bdi dir="ltr" className="px-2.5 py-2 font-mono text-[0.75rem] text-fg-muted">
+                {cohortYears(cohort.starts_on, cohort.ends_on)}
+              </bdi>
+            </p>
+          )}
           <h1
             id="hero-heading"
             className={cn(
-              "text-[clamp(2.6rem,11vw,5.25rem)] leading-[1.02] font-extrabold text-balance text-fg",
-              l === "en" ? "tracking-[-0.025em]" : "tracking-[-0.01em]",
+              "mt-5 text-[clamp(3rem,12.5vw,6.5rem)] leading-[0.98] font-extrabold text-balance text-fg",
+              l === "en" ? "tracking-[-0.03em]" : "tracking-[-0.015em]",
             )}
           >
             <span className="intro block [--i:1]">{t("heroLine1")}</span>
             <span className="intro block text-brand-purple-soft [--i:2]">{t("heroLine2")}</span>
           </h1>
           {tagline && (
-            <p className="intro mt-4 max-w-[46ch] text-[1.0625rem] leading-relaxed text-pretty text-fg-muted [--i:3] lg:text-[1.1875rem]">
+            <p className="intro mt-5 max-w-[44ch] text-[1.0625rem] leading-relaxed text-pretty text-fg-muted [--i:3] lg:text-[1.1875rem]">
               {tagline}
-            </p>
-          )}
-          {cohort && (
-            <p className="intro mt-5 flex flex-wrap items-center gap-x-3.5 gap-y-2 [--i:4]">
-              <span lang="en" className="eyebrow-pixel text-[0.6875rem]">
-                {cohort.name_en}
-              </span>
-              <bdi dir="ltr" className="font-mono text-[0.8125rem] text-fg-subtle">
-                {cohortYears(cohort.starts_on, cohort.ends_on)}
-              </bdi>
             </p>
           )}
         </section>
 
-        {!showSchedule ? null : season.status === "ok" ? (
+        {!showSchedule ? (
+          <PixelMosaic className="w-44 justify-self-end rtl:-scale-x-100 sm:w-56 lg:w-[22rem]" />
+        ) : season.status === "ok" ? (
           <NextEventCard event={next} now={season.now} seriesTotal={seriesTotal} />
         ) : (
           <p role="status" data-testid="data-unavailable" className="rounded-lg border border-border bg-surface p-5">
             {te("dataUnavailable")}
           </p>
         )}
+      </div>
+
+      {/* The club's sign-off, set as the page's one big pixel moment. Latin on both locales (Silkscreen is Latin only). */}
+      <div className="mx-auto mt-10 max-w-site overflow-hidden px-4 sm:px-8 lg:mt-14">
+        <p
+          lang="en"
+          dir="ltr"
+          className="flex items-end border-y border-border py-3 font-pixel text-[clamp(2.5rem,11.6vw,9.25rem)] leading-[0.82] whitespace-nowrap text-fg rtl:justify-end"
+        >
+          <span>{tf("tagline")}</span>
+          <span aria-hidden className="pixel-caret shrink-0" />
+        </p>
       </div>
 
       <ClubAbout locale={l} />
