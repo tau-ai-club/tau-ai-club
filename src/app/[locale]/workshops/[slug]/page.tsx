@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getEventBySlug, getSeason } from "@/lib/events";
 import { getEventContent } from "@/lib/content/data";
 import { WORKSHOP_SECTIONS, bodyFor, hasBody } from "@/lib/content/sections";
-import { formatEventDate, formatTimeRange, isoAttr, loc } from "@/lib/event-format";
+import { dbLang, formatEventDate, formatTimeRange, isoAttr, loc } from "@/lib/event-format";
 import { Tag } from "@/components/events/event-bits";
 import { MembersSoon, PageBackdrop, SpeakerList } from "@/components/content/content-bits";
 import { HomeMotion } from "@/components/motion/home-motion";
@@ -61,7 +61,7 @@ export default async function WorkshopPage({ params }: PageProps<"/[locale]/work
           {event.series_no && total > 0 && <span className="text-sm text-fg-muted">{t("workshopNo", { n: event.series_no, total })}</span>}
           {event.state === "past" && <Tag pixel>{te("past")}</Tag>}
         </div>
-        <h1 className="text-[clamp(2rem,6.5vw,3.25rem)] leading-[1.08] font-extrabold text-balance text-fg">{loc(event, "title", l) ?? slug}</h1>
+        <h1 {...dbLang(l)} className="text-[clamp(2rem,6.5vw,3.25rem)] leading-[1.08] font-extrabold text-balance text-fg">{loc(event, "title", l) ?? slug}</h1>
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-fg-muted">
           <CalendarDays aria-hidden className="size-4 shrink-0 text-brand-purple-soft" />
           <time dateTime={isoAttr(event.starts_at)}>{formatEventDate(event.starts_at, l)}</time>

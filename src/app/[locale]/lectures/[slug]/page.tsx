@@ -9,7 +9,7 @@ import { getEventBySlug, getSeason } from "@/lib/events";
 import { getPublicSections } from "@/lib/content/data";
 import { LECTURE_SECTIONS, bodyFor, contentKindOf } from "@/lib/content/sections";
 import { markdownToText } from "@/lib/content/markdown";
-import { formatEventDate, formatTimeRange, isoAttr, loc, speakerNames } from "@/lib/event-format";
+import { dbLang, formatEventDate, formatTimeRange, isoAttr, loc, speakerNames } from "@/lib/event-format";
 import { alternatesFor, shareMetadata } from "@/lib/seo";
 import { Tag } from "@/components/events/event-bits";
 import { Eyebrow, MembersOnlyMark, MembersSoon, PageBackdrop, SpeakerList } from "@/components/content/content-bits";
@@ -98,7 +98,7 @@ export default async function LecturePage({ params }: PageProps<"/[locale]/lectu
           <Eyebrow he="הרצאה" en="Lecture" />
           {event.state === "past" && <Tag pixel>{te("past")}</Tag>}
         </div>
-        <h1 className="text-[clamp(2rem,6.5vw,3.25rem)] leading-[1.08] font-extrabold text-balance text-fg">{title}</h1>
+        <h1 {...dbLang(l)} className="text-[clamp(2rem,6.5vw,3.25rem)] leading-[1.08] font-extrabold text-balance text-fg">{title}</h1>
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-fg-muted">
           <CalendarDays aria-hidden className="size-4 shrink-0 text-brand-purple-soft" />
           <time dateTime={isoAttr(event.starts_at)}>{formatEventDate(event.starts_at, l)}</time>

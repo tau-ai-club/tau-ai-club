@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import type { Locale } from "@/i18n/routing";
+import { dbLang } from "@/lib/event-format";
 import { cn } from "@/lib/utils";
 import { CompanyBadge, roleCapsClass } from "./flyer-bits";
 import { initialsOf } from "./speaker-face";
@@ -40,13 +41,13 @@ export function PersonCard({
         <PixelPortrait name={name} photoUrl={photoUrl} company={company} />
         <SpeakerLinkedIn url={linkedinUrl} name={name} className="-me-2 -mt-2" />
       </div>
-      <p className="mt-4 leading-tight font-bold text-pretty text-fg lg:text-lg">{name}</p>
+      <p {...dbLang(locale)} className="mt-4 leading-tight font-bold text-pretty text-fg lg:text-lg">{name}</p>
       {company && (
-        <p className="mt-1 text-sm text-fg-muted">
+        <p {...dbLang(locale)} className="mt-1 text-sm text-fg-muted">
           <bdi>{company}</bdi>
         </p>
       )}
-      {role && <p className={cn("mt-2 text-pretty", roleCapsClass(locale))}>{role}</p>}
+      {role && <p {...dbLang(locale)} className={cn("mt-2 text-pretty", roleCapsClass(locale))}>{role}</p>}
     </li>
   );
 }

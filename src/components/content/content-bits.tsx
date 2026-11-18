@@ -1,6 +1,6 @@
 import { getLocale } from "next-intl/server";
 import { LockKeyhole } from "lucide-react";
-import { loc } from "@/lib/event-format";
+import { dbLang, loc } from "@/lib/event-format";
 import type { Locale } from "@/i18n/routing";
 import type { SeasonEvent } from "@/lib/data/types";
 import { SpeakerFace, initialsOf } from "@/components/events/speaker-face";
@@ -40,8 +40,8 @@ export function SpeakerList({ event, locale, size = 56, className }: { event: Se
           <li key={speaker.id} className="flex min-w-0 items-center gap-3">
             <SpeakerFace pixel speaker={{ name, initials: initialsOf(name), photoUrl: speaker.photo_url }} size={size} />
             <span className="grid min-w-0">
-              <span className="font-semibold text-fg">{name}</span>
-              {role && <span className="text-sm text-fg-muted">{role}</span>}
+              <span {...dbLang(locale)} className="font-semibold text-fg">{name}</span>
+              {role && <span {...dbLang(locale)} className="text-sm text-fg-muted">{role}</span>}
             </span>
           </li>
         );

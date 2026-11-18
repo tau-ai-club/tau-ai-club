@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { animate, AnimatePresence, MotionConfig, motion, useMotionValue, useMotionValueEvent, useReducedMotion } from "motion/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, MapPin, RotateCcw, X } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import type { Locale } from "@/i18n/routing";
+import { dbLang } from "@/lib/event-format";
 import { cn } from "@/lib/utils";
 import { dur, ease } from "@/lib/motion";
 import { SpeakerFace as Face, type FaceSpeaker } from "./speaker-face";
@@ -71,6 +73,7 @@ const norm = (deg: number) => ((((deg + 180) % 360) + 360) % 360) - 180;
 export function SeasonDial({ events, startDay, endDay, nowDay, nextIndex, dayLabels, months, rtl }: Props) {
   const t = useTranslations("season");
   const te = useTranslations("event");
+  const dbl = dbLang(useLocale() as Locale);
   const reduce = useReducedMotion();
   const span = Math.max(1, endDay - startDay);
   const angleOf = useCallback((day: number) => ((day - startDay) / span) * ARC, [startDay, span]);
@@ -349,7 +352,7 @@ export function SeasonDial({ events, startDay, endDay, nowDay, nextIndex, dayLab
                           )}
                         />
                         <span className="sr-only">
-                          {e.title}, <time dateTime={e.startsAt}>{e.fullDate}</time>
+                          <span {...dbl}>{e.title}</span>, <time dateTime={e.startsAt}>{e.fullDate}</time>
                         </span>
                       </Link>
                     </li>
@@ -410,8 +413,8 @@ export function SeasonDial({ events, startDay, endDay, nowDay, nextIndex, dayLab
                       <li key={sp.name} className="flex items-center gap-3">
                         <SpeakerAvatar name={sp.name} photoUrl={sp.photoUrl} size={selected.speakers.length > 1 ? 52 : 72} />
                         <div className="min-w-0 flex-1">
-                          <p className="leading-tight font-bold text-fg">{sp.name}</p>
-                          {sp.role && <p className="mt-1 text-sm leading-snug text-fg-muted">{sp.role}</p>}
+                          <p {...dbl} className="leading-tight font-bold text-fg">{sp.name}</p>
+                          {sp.role && <p {...dbl} className="mt-1 text-sm leading-snug text-fg-muted">{sp.role}</p>}
                           {sp.company && (
                             <p className="text-sm leading-snug font-medium text-brand-purple-soft">
                               <bdi>{sp.company}</bdi>
@@ -425,6 +428,7 @@ export function SeasonDial({ events, startDay, endDay, nowDay, nextIndex, dayLab
                 )}
 
                 <h3
+                  {...dbl}
                   id="dial-pop-title"
                   className={cn("text-lg leading-snug font-bold text-balance text-fg", selected.speakers.length === 0 && "pe-8")}
                 >
@@ -474,7 +478,7 @@ export function SeasonDial({ events, startDay, endDay, nowDay, nextIndex, dayLab
               {selected.tentative && <span className="tag tag-tentative">{te("tentative")}</span>}
               {selected.venueTbd && <span className="tag tag-tbd">{te("venueTbd")}</span>}
             </div>
-            <h3 className="mt-3 text-[1.375rem] leading-tight font-bold text-balance text-fg">{selected.title}</h3>
+            <h3 {...dbl} className="mt-3 text-[1.375rem] leading-tight font-bold text-balance text-fg">{selected.title}</h3>
             <p className="mt-2 text-fg-muted">
               {selected.fullDate}
               <span aria-hidden className="mx-1.5 text-fg-faint">

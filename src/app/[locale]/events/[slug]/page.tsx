@@ -8,6 +8,7 @@ import { TIME_ZONE, intlLocale, isLatin } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { getEventBySlug, getEventSlugs, getSeason } from "@/lib/events";
 import {
+  dbLang,
   formatEventDate,
   formatShortDate,
   formatTimeRange,
@@ -189,6 +190,7 @@ export default async function EventPage({ params }: PageProps<"/[locale]/events/
             {event.is_tentative && <Tag tone="tentative">{te("tentative")}</Tag>}
           </div>
           <h1
+            {...dbLang(l)}
             className={cn(
               "intro mt-5 text-[clamp(2.25rem,7.5vw,4rem)] leading-[1.05] font-extrabold text-balance [--i:1]",
               past ? "text-fg-muted" : "text-fg",
@@ -209,7 +211,7 @@ export default async function EventPage({ params }: PageProps<"/[locale]/events/
             )}
           </h1>
           {blurb && (
-            <p className="intro mt-5 max-w-[60ch] text-[1.0625rem] leading-relaxed text-pretty text-fg-muted [--i:2] lg:text-[1.1875rem]">
+            <p {...dbLang(l)} className="intro mt-5 max-w-[60ch] text-[1.0625rem] leading-relaxed text-pretty text-fg-muted [--i:2] lg:text-[1.1875rem]">
               {blurb}
             </p>
           )}
@@ -229,10 +231,10 @@ export default async function EventPage({ params }: PageProps<"/[locale]/events/
                     <li key={sp.key} data-testid="event-speaker" className="flex items-center gap-4 sm:gap-5">
                       <SpeakerAvatar pixel name={sp.name} photoUrl={sp.photoUrl} company={sp.company} size={solo ? 96 : 80} muted={past} />
                       <div className="min-w-0">
-                        <p className={cn("leading-tight font-bold text-balance text-fg", solo ? "text-[clamp(1.5rem,4vw,2rem)]" : "text-xl")}>
+                        <p {...dbLang(l)} className={cn("leading-tight font-bold text-balance text-fg", solo ? "text-[clamp(1.5rem,4vw,2rem)]" : "text-xl")}>
                           {sp.name}
                         </p>
-                        {sp.role && <p className="mt-1.5 leading-snug font-semibold text-fg">{sp.role}</p>}
+                        {sp.role && <p {...dbLang(l)} className="mt-1.5 leading-snug font-semibold text-fg">{sp.role}</p>}
                         {sp.company && (
                           <p className="mt-0.5 text-fg-subtle">
                             <bdi>{sp.company}</bdi>
@@ -329,30 +331,28 @@ export default async function EventPage({ params }: PageProps<"/[locale]/events/
             {prev ? (
               <Link
                 href={`/events/${prev.slug}`}
-                className="group grid gap-1 p-4 transition-colors duration-150 hover:bg-surface sm:p-5"
+                className={`group grid gap-1 p-4 transition-colors duration-150 hover:bg-surface sm:p-5${next ? "" : " sm:col-span-2"}`}
               >
                 <span className="inline-flex items-center gap-1.5 text-sm text-fg-subtle">
                   <Back aria-hidden className="size-4" />
                   {t("prevMeetup")}
                 </span>
-                <span className="font-semibold text-fg">{loc(prev, "title", l)}</span>
+                <span {...dbLang(l)} className="font-semibold text-fg">{loc(prev, "title", l)}</span>
                 <bdi dir="ltr" className="w-fit font-mono text-sm text-fg-subtle">
                   {formatShortDate(prev.starts_at, l)}
                 </bdi>
               </Link>
-            ) : (
-              <span aria-hidden className="hidden sm:block" />
-            )}
+            ) : null}
             {next && (
               <Link
                 href={`/events/${next.slug}`}
-                className="group grid justify-items-end gap-1 p-4 text-end transition-colors duration-150 hover:bg-surface sm:p-5"
+                className={`group grid justify-items-end gap-1 p-4 text-end transition-colors duration-150 hover:bg-surface sm:p-5${prev ? "" : " sm:col-span-2"}`}
               >
                 <span className="inline-flex items-center gap-1.5 text-sm text-fg-subtle">
                   {t("nextMeetup")}
                   <Forward aria-hidden className="size-4" />
                 </span>
-                <span className="font-semibold text-fg">{loc(next, "title", l)}</span>
+                <span {...dbLang(l)} className="font-semibold text-fg">{loc(next, "title", l)}</span>
                 <bdi dir="ltr" className="w-fit font-mono text-sm text-fg-subtle">
                   {formatShortDate(next.starts_at, l)}
                 </bdi>

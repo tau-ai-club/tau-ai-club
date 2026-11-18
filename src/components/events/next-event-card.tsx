@@ -2,7 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { intlLocale, type Locale } from "@/i18n/routing";
 import { TIME_ZONE } from "@/i18n/routing";
 import type { SeasonEvent } from "@/lib/data/types";
-import { formatEventDate, formatShortDate, formatTimeRange, isoAttr, loc, venueIsTbd, venueLabel } from "@/lib/event-format";
+import { dbLang, formatEventDate, formatShortDate, formatTimeRange, isoAttr, loc, venueIsTbd, venueLabel } from "@/lib/event-format";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { EventActions, EventPills, Tag } from "./event-bits";
@@ -83,7 +83,7 @@ export async function NextEventCard({
       {event ? (
         <>
           <h2 className="mt-5 text-[clamp(1.5rem,6vw,2rem)] leading-[1.12] font-extrabold text-balance">
-            <Link href={`/events/${event.slug}`} className="rounded-sm transition-colors duration-150 hover:text-brand-purple-softer">
+            <Link href={`/events/${event.slug}`} {...dbLang(locale)} className="rounded-sm transition-colors duration-150 hover:text-brand-purple-softer">
               {title.head}
               {title.accent && (
                 <>
@@ -114,9 +114,9 @@ export async function NextEventCard({
                     <div className="min-w-0">
                       <p className="leading-tight font-semibold text-fg">
                         <span className="sr-only">{tp("speakers")}: </span>
-                        {name}
+                        <span {...dbLang(locale)}>{name}</span>
                       </p>
-                      {line && <p className="mt-0.5 text-sm leading-snug text-fg-subtle">{line}</p>}
+                      {line && <p {...dbLang(locale)} className="mt-0.5 text-sm leading-snug text-fg-subtle">{line}</p>}
                     </div>
                   </li>
                 );
@@ -167,7 +167,7 @@ export async function NextEventCard({
           </dl>
 
           {blurb && (
-            <p className="mt-4 max-w-[68ch] rounded-md border border-border bg-bg-deep/45 px-3.5 py-3 text-[0.9375rem] leading-relaxed text-fg-muted">
+            <p {...dbLang(locale)} className="mt-4 max-w-[68ch] rounded-md border border-border bg-bg-deep/45 px-3.5 py-3 text-[0.9375rem] leading-relaxed text-fg-muted">
               {blurb}
             </p>
           )}

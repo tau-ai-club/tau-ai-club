@@ -92,3 +92,11 @@ export function googleCalendarUrl(
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
+
+/**
+ * Database text has Hebrew and English columns only, so on the German and French pages it renders
+ * in English. Spread this onto the element holding that text so screen readers switch voice.
+ */
+export function dbLang(locale: Locale): { lang?: "en" } {
+  return locale === "de" || locale === "fr" ? { lang: "en" } : {};
+}
