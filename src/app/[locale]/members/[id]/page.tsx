@@ -47,7 +47,9 @@ export default async function MemberPage({ params }: PageProps<"/[locale]/member
       <PageBackdrop />
       <div className="mx-auto max-w-4xl px-4 pt-10 pb-20 sm:px-8 lg:pt-14">
         <MembersEyebrow />
-        <header className="pixel-corners mt-3 flex flex-col gap-5 border border-brand-purple/40 bg-bg-raised p-6 shadow-[var(--highlight-top)] [--px:6px] [background-image:var(--card-featured-bg)] sm:flex-row sm:items-center sm:gap-7 sm:p-8">
+        {/* 1px frame of the same stepped shape (clip-path would cut a real border at the corners). */}
+        <div className="pixel-corners mt-3 bg-brand-purple/40 p-px [--px:6px]">
+        <header className="pixel-corners flex flex-col gap-5 bg-bg-raised p-6 shadow-[var(--highlight-top)] [--px:6px] [background-image:var(--card-featured-bg)] sm:flex-row sm:items-center sm:gap-7 sm:p-8">
           <MemberAvatar name={profile.full_name} src={photoSrc} size={128} />
           <div className="grid min-w-0 gap-2">
             <h1 className="text-[clamp(1.875rem,6vw,2.5rem)] leading-[1.1] font-extrabold text-balance text-fg">{profile.full_name}</h1>
@@ -60,6 +62,7 @@ export default async function MemberPage({ params }: PageProps<"/[locale]/member
             )}
           </div>
         </header>
+        </div>
 
         <div className={cn("mt-5 grid items-start gap-5", (links.length > 0 || contact) && "md:grid-cols-[minmax(0,1fr)_16rem]")}>
           <section aria-label={t("about")} className={cn(raisedPanelClass, "p-5 sm:p-6")}>

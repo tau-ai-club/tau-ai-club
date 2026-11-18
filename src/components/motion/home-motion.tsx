@@ -80,8 +80,11 @@ export function HomeMotion() {
         // Grids: cells appear as blocks, ordered along the diagonal from the reading start.
         root.querySelectorAll<HTMLElement>("[data-build]").forEach((grid) => {
           if (!below(grid)) return;
-          const cells = Array.from(grid.children) as HTMLElement[];
-          const cols = getComputedStyle(grid).gridTemplateColumns.split(" ").length || 1;
+          // Skip the [data-pad] masks of .people-grid; they are empty, not cells.
+          const cells = (Array.from(grid.children) as HTMLElement[]).filter((c) => !c.hasAttribute("data-pad"));
+          let cols = getComputedStyle(grid).gridTemplateColumns.split(" ").length || 1;
+          // .people-grid uses 2 tracks per column on desktop (cells span 2).
+          if (grid.classList.contains("people-grid") && cols > 2) cols = Math.max(1, Math.round(cols / 2));
           cells.forEach((c) => {
             c.style.opacity = "0";
             c.style.translate = "0 18px";

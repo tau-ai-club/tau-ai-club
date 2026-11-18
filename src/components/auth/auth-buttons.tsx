@@ -112,7 +112,9 @@ export function AuthPanel({
         className={cn("mx-auto grid gap-5 px-4 pt-10 pb-20 sm:px-8 sm:pt-16 lg:pt-20", wide ? "max-w-[46rem]" : "max-w-[36rem]")}
       >
         {/* The border is a 1px frame of the same stepped shape (clip-path would cut a real border at the corners). */}
-        <div className="pixel-corners pixel-corners-lg bg-border-accent p-px shadow-[var(--shadow-featured)]">
+        {/* The shadow sits on an unclipped wrapper: clip-path would cut it off. */}
+        <div className="shadow-[var(--shadow-featured)]">
+        <div className="pixel-corners pixel-corners-lg bg-border-accent p-px">
           <div className="pixel-corners pixel-corners-lg bg-bg-raised p-6 [background-image:var(--card-featured-bg)] sm:p-8">
             <div className="intro flex items-start justify-between gap-4 [--i:0]">
               {icon ? (
@@ -136,6 +138,7 @@ export function AuthPanel({
             </h1>
             <div className="intro mt-4 grid gap-5 text-[1.0625rem] leading-relaxed text-fg-muted [--i:2]">{children}</div>
           </div>
+        </div>
         </div>
         {after}
       </section>
