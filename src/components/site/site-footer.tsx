@@ -36,7 +36,7 @@ export async function SiteFooter() {
         >
           <span className="text-brand-purple-soft">{t("tagline")}</span>
           <span>
-            {meta("siteName")} · <bdi>{new Date().getFullYear()}</bdi>
+            {en ? meta("siteName") : <span lang="en">{meta("siteName")}</span>} · <bdi>{new Date().getFullYear()}</bdi>
           </span>
         </p>
       </div>

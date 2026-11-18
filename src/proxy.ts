@@ -54,10 +54,12 @@ export default async function proxy(request: NextRequest) {
   return response;
 }
 
+const NON_DEFAULT_LOCALE_PREFIX = new RegExp(`^/(${routing.locales.filter((l) => l !== routing.defaultLocale).join("|")})(?=/|$)`);
+
 /** Rewrites a members/admin path ("/admin/…", "/en/profile") to /<locale>/coming-soon. */
 function comingSoon(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const m = new RegExp(`^/(${routing.locales.filter((l) => l !== routing.defaultLocale).join("|")})(?=/|$)`).exec(pathname);
+  const m = NON_DEFAULT_LOCALE_PREFIX.exec(pathname);
   // "/he/…" first goes through next-intl's redirect to the unprefixed URL.
   if (/^\/he(?=\/|$)/.test(pathname)) return null;
   const locale = m ? m[1] : routing.defaultLocale;

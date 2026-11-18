@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import NextLink from "next/link";
 import { usePathname } from "@/i18n/navigation";
@@ -19,6 +19,7 @@ export function LanguageSwitch() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
+  const listId = useId();
 
   useEffect(() => {
     if (!open) return;
@@ -40,11 +41,19 @@ export function LanguageSwitch() {
   }, [open]);
 
   return (
-    <div ref={root} className="relative">
+    <div
+      ref={root}
+      className="relative"
+      onBlur={(e) => {
+        // Keyboard users tabbing out of the menu close it.
+        // A null relatedTarget (mouse click on a link in Safari) is left to the pointerdown handler.
+        if (open && e.relatedTarget && !root.current?.contains(e.relatedTarget as Node)) setOpen(false);
+      }}
+    >
       <button
         type="button"
         aria-expanded={open}
-        aria-controls="language-list"
+        aria-controls={open ? listId : undefined}
         aria-label={`${t("language")}: ${NATIVE_NAME[locale]}`}
         onClick={() => setOpen((v) => !v)}
         className="inline-flex h-9 min-w-11 items-center justify-center gap-1.5 rounded-md border border-border px-2.5 text-fg-muted transition-colors duration-150 hover:bg-surface-hover hover:text-fg max-sm:h-11"
@@ -56,7 +65,7 @@ export function LanguageSwitch() {
       </button>
       {open && (
         <ul
-          id="language-list"
+          id={listId}
           className="absolute end-0 top-full z-50 mt-2 min-w-44 rounded-lg border border-border-accent bg-bg p-1 shadow-lg"
         >
           {routing.locales.map((target) => (
