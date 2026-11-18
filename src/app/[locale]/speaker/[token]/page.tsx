@@ -4,7 +4,7 @@ import { Clock, Handshake, Unlink } from "lucide-react";
 import type { Locale } from "@/i18n/routing";
 import { createPublicClient } from "@/lib/supabase/public";
 import { formatShortDate, loc } from "@/lib/event-format";
-import { AuthPanel } from "@/components/auth/auth-buttons";
+import { AuthChip, AuthPanel } from "@/components/auth/auth-buttons";
 import { SpeakerContactForm } from "@/components/speaker/speaker-contact-form";
 import { submitSpeakerContact } from "./actions";
 
@@ -52,11 +52,11 @@ export default async function SpeakerFormPage({ params }: PageProps<"/[locale]/s
       wide
       testId="speaker-form"
       icon={<Handshake aria-hidden />}
-      eyebrow={<p className={locale === "he" ? "eyebrow-he" : "eyebrow-pixel text-[0.6875rem]"}>{t("eyebrow")}</p>}
+      eyebrow={<AuthChip locale={locale}>{t("eyebrow")}</AuthChip>}
       title={t("title", { name: loc(info, "name", locale) ?? "" })}
     >
       <p className="max-w-[60ch]">{t("intro")}</p>
-      <p className="flex w-fit items-center gap-2 rounded-md border border-border bg-bg-deep/45 px-3 py-2 text-sm text-fg-muted">
+      <p className="flex w-fit items-center gap-2 rounded-[3px] border border-border bg-bg-deep/45 px-3 py-2 text-sm text-fg-muted">
         <Clock aria-hidden className="size-4 shrink-0 text-brand-purple-soft" />
         <span>{t("expires", { date: formatShortDate(info.expires_at, locale) })}</span>
       </p>

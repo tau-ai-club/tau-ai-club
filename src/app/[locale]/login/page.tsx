@@ -5,9 +5,8 @@ import { Link, redirect } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getViewer } from "@/lib/auth/viewer";
 import { safeNext } from "@/lib/auth/next-path";
-import { AuthAlert, AuthPanel, SignedInAs, SignOutButton } from "@/components/auth/auth-buttons";
+import { AuthAlert, AuthChip, AuthPanel, SignedInAs, SignOutButton } from "@/components/auth/auth-buttons";
 import { hintClass, inputClass, labelClass } from "@/components/admin/styles";
-import { FlyerChip } from "@/components/events/flyer-bits";
 import { SOCIAL } from "@/config/site";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +15,7 @@ function Steps({ on }: { on: 1 | 2 | 3 }) {
   return (
     <span aria-hidden className="flex gap-1.5">
       {[1, 2, 3].map((n) => (
-        <i key={n} className={cn("h-1 flex-1 rounded-full", n <= on ? "bg-brand-purple" : "bg-border-strong")} />
+        <i key={n} className={cn("h-1.5 flex-1", n <= on ? "bg-brand-purple" : "bg-border-strong")} />
       ))}
     </span>
   );
@@ -57,7 +56,7 @@ export default async function LoginPage({ params, searchParams }: PageProps<"/[l
   const eyebrow = (on: 1 | 2 | 3) => (
     <div className="grid gap-5">
       <Steps on={on} />
-      {on > 1 && <FlyerChip locale={l}>{nav("signIn")}</FlyerChip>}
+      {on > 1 && <AuthChip locale={l}>{nav("signIn")}</AuthChip>}
     </div>
   );
   // No sign-up: people outside the cohort are pointed to the club's Instagram.
@@ -101,7 +100,7 @@ export default async function LoginPage({ params, searchParams }: PageProps<"/[l
     return (
       <AuthPanel testId="login" eyebrow={eyebrow(2)} title={t("codeTitle")} icon={<MailCheck aria-hidden />} after={notInCohort}>
         {/* Neutral on purpose: it never says whether the email is on the list. */}
-        <p className="flex items-start gap-3 rounded-md border border-border-accent bg-brand-purple/[0.07] px-3.5 py-3 text-[0.9375rem] text-fg">
+        <p className="flex items-start gap-3 rounded-[3px] border border-border-accent bg-brand-purple/[0.07] px-3.5 py-3 text-[0.9375rem] text-fg">
           <Mail aria-hidden className="mt-0.5 size-[18px] shrink-0 text-brand-purple-soft" />
           <span data-testid="code-sent">{t("codeSent")}</span>
         </p>

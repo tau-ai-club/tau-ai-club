@@ -37,7 +37,7 @@ export function SpeakerContactForm({ action, token, labels }: { action: FormActi
 
   if (state?.ok) {
     return (
-      <div role="status" data-testid="speaker-form-done" className="flex items-start gap-3.5 rounded-lg border border-border-accent bg-surface p-5">
+      <div role="status" data-testid="speaker-form-done" className="flex items-start gap-3.5 border border-border-accent bg-surface p-5">
         <CircleCheck aria-hidden className="mt-0.5 size-6 shrink-0 text-brand-purple-soft" />
         <div className="grid gap-1">
           <p className="text-lg font-semibold text-fg">{labels.doneTitle}</p>
@@ -59,7 +59,7 @@ export function SpeakerContactForm({ action, token, labels }: { action: FormActi
     return (
       <fieldset
         className={cn(
-          "grid gap-3 rounded-lg border p-4 transition-colors duration-200 sm:p-5",
+          "grid gap-3 rounded-[3px] border p-4 transition-colors duration-200 sm:p-5",
           on ? "border-border-accent bg-surface" : "border-border bg-bg-deep/30",
         )}
       >
@@ -113,13 +113,13 @@ export function SpeakerContactForm({ action, token, labels }: { action: FormActi
         {labels.membersOnlyNote}
       </p>
 
-      <label className="mt-3 flex cursor-pointer items-start gap-3 rounded-lg border border-border-accent bg-brand-purple-deeper/25 p-4 text-[0.9375rem] leading-relaxed text-fg sm:p-5">
+      <label className="mt-3 flex cursor-pointer items-start gap-3 rounded-[3px] border border-border-accent bg-brand-purple-deeper/25 p-4 text-[0.9375rem] leading-relaxed text-fg sm:p-5">
         <input type="checkbox" name="consent" required className="mt-1 size-5 shrink-0 cursor-pointer accent-brand-purple" />
         {labels.consent}
       </label>
 
       {state && !state.ok && (
-        <p role="alert" className="rounded-md border border-destructive/50 bg-destructive/10 px-3.5 py-3 text-[0.9375rem] text-fg">
+        <p role="alert" className="rounded-[3px] border border-destructive/50 bg-destructive/10 px-3.5 py-3 text-[0.9375rem] text-fg">
           {state.message}
         </p>
       )}

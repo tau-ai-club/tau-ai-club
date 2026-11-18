@@ -32,7 +32,7 @@ export default async function MembersOnlyPage({ params }: PageProps<"/[locale]/m
       title={t("membersOnlyTitle")}
       icon={<Sparkles aria-hidden />}
       after={
-        <aside className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <aside className="flex flex-col gap-4 border border-border-accent bg-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div className="grid gap-1">
             <h2 className="font-semibold text-fg">{t("membersOnlyFollowTitle")}</h2>
             <p className="max-w-[40ch] text-[0.9375rem] text-fg-muted">{t("membersOnlyFollowBody")}</p>

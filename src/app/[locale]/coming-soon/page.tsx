@@ -4,7 +4,7 @@ import { ArrowUpRight, Hourglass } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { SOCIAL } from "@/config/site";
-import { AuthPanel } from "@/components/auth/auth-buttons";
+import { AuthChip, AuthPanel } from "@/components/auth/auth-buttons";
 import { InstagramIcon } from "@/components/site/instagram-icon";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/coming-soon">): Promise<Metadata> {
@@ -27,7 +27,7 @@ export default async function ComingSoonPage({ params }: PageProps<"/[locale]/co
     <AuthPanel
       testId="coming-soon"
       icon={<Hourglass aria-hidden />}
-      eyebrow={<p className={locale === "he" ? "eyebrow-he" : "eyebrow-pixel text-[0.6875rem]"}>{t("eyebrow")}</p>}
+      eyebrow={<AuthChip locale={locale}>{t("eyebrow")}</AuthChip>}
       title={t("title")}
     >
       <p>{t("body")}</p>
