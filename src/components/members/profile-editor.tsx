@@ -1,9 +1,11 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { Locale } from "@/i18n/routing";
+import { PanelHeading } from "@/components/members/panel-heading";
 import { Eye, ShieldCheck } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { MemberProfile, MyContact } from "@/lib/members/profile";
 import { ActionForm } from "@/components/admin/action-form";
-import { hintClass, inputClass, labelClass, raisedPanelClass, panelTitle, smallBtn } from "@/components/admin/styles";
+import { hintClass, inputClass, labelClass, raisedPanelClass, smallBtn } from "@/components/admin/styles";
 import { FilePicker } from "@/components/admin/file-picker";
 import { MemberAvatar } from "@/components/members/member-avatar";
 import { ProfileSubline } from "@/components/members/profile-subline";
@@ -31,7 +33,7 @@ export async function ProfileEditor({
   contact: MyContact | null;
   photoSrc: string | null;
 }) {
-  const t = await getTranslations("profile");
+  const [t, locale] = await Promise.all([getTranslations("profile"), getLocale() as Promise<Locale>]);
   const links = profile?.links ?? {};
   const subline = [profile?.year ? t("yearN", { n: profile.year }) : null, profile?.faculty, profile?.program];
   const viewer = { member: { id: memberId } };
@@ -41,7 +43,7 @@ export async function ProfileEditor({
 
   const summary = (
     <div className="flex items-center gap-4">
-      <MemberAvatar name={name} src={photoSrc} size={72} className="rounded-full ring-2 ring-brand-purple/40 ring-offset-2 ring-offset-surface" />
+      <MemberAvatar name={name} src={photoSrc} size={72} />
       <div className="min-w-0">
         <p className="text-lg leading-tight font-bold break-words text-fg">{name}</p>
         <ProfileSubline parts={subline} className="mt-1 text-sm text-fg-subtle" />
@@ -64,10 +66,10 @@ export async function ProfileEditor({
       {/* ---------- Photo ---------- */}
       <aside className={cn(raisedPanelClass, "grid gap-5 p-5 shadow-[var(--highlight-top)] sm:p-6 lg:sticky lg:top-8")}>
         <section aria-labelledby="photo-heading" className="grid gap-4">
-          <h2 id="photo-heading" className={panelTitle}>
+          <PanelHeading id="photo-heading" locale={locale}>
             {t("photo")}
-          </h2>
-          <MemberAvatar name={name} src={photoSrc} size={112} className="rounded-full ring-2 ring-brand-purple/40 ring-offset-2 ring-offset-surface" />
+          </PanelHeading>
+          <MemberAvatar name={name} src={photoSrc} size={112} />
           <ActionForm action={uploadPhoto} resetOnSuccess className="grid gap-3">
             <label className={labelClass}>
               {t("photoPick")}
@@ -92,9 +94,9 @@ export async function ProfileEditor({
 
       {/* ---------- Details form ---------- */}
       <section aria-labelledby="details-heading" className={cn(raisedPanelClass, "p-5 shadow-[var(--highlight-top)] sm:p-6 lg:p-7")}>
-        <h2 id="details-heading" className={panelTitle}>
+        <PanelHeading id="details-heading" locale={locale}>
           {t("details")}
-        </h2>
+        </PanelHeading>
         <ActionForm action={saveProfile} className="mt-5 grid gap-5">
           <label className={labelClass}>
             {t("fullName")}

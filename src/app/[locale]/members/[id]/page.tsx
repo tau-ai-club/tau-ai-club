@@ -9,10 +9,12 @@ import { createClient } from "@/lib/supabase/server";
 import { loc } from "@/lib/event-format";
 import { signPhotos } from "@/lib/members/photos";
 import { getMemberContact, getMemberProfile, LINK_KEYS } from "@/lib/members/profile";
-import { panelClass, smallBtn } from "@/components/admin/styles";
+import { raisedPanelClass, smallBtn } from "@/components/admin/styles";
 import { MemberAvatar } from "@/components/members/member-avatar";
 import { ProfileSubline } from "@/components/members/profile-subline";
 import { MembersEyebrow } from "@/components/members/members-eyebrow";
+import { PanelHeading } from "@/components/members/panel-heading";
+import { PageBackdrop } from "@/components/site/page-backdrop";
 import { cn } from "@/lib/utils";
 
 // Members only: no member's name goes into the title or any metadata.
@@ -41,9 +43,11 @@ export default async function MemberPage({ params }: PageProps<"/[locale]/member
   const subline = [profile.year ? t("yearN", { n: profile.year }) : null, profile.faculty, profile.program];
 
   return (
-    <article className="mx-auto max-w-4xl px-4 pt-10 pb-20 sm:px-8 lg:pt-14" data-testid="member-profile">
+    <article className="relative isolate" data-testid="member-profile">
+      <PageBackdrop />
+      <div className="mx-auto max-w-4xl px-4 pt-10 pb-20 sm:px-8 lg:pt-14">
       <MembersEyebrow />
-      <header className="mt-3 flex flex-col gap-5 rounded-lg border border-border-accent bg-bg-raised p-6 shadow-[var(--shadow-featured)] [background-image:var(--card-featured-bg)] sm:flex-row sm:items-center sm:gap-7 sm:p-8">
+      <header className="pixel-corners mt-3 flex flex-col gap-5 border border-brand-purple/40 bg-bg-raised p-6 shadow-[var(--highlight-top)] [--px:6px] [background-image:var(--card-featured-bg)] sm:flex-row sm:items-center sm:gap-7 sm:p-8">
         <MemberAvatar name={profile.full_name} src={photoSrc} size={128} />
         <div className="grid min-w-0 gap-2">
           <h1 className="text-[clamp(1.875rem,6vw,2.5rem)] leading-[1.1] font-extrabold text-balance text-fg">{profile.full_name}</h1>
@@ -58,23 +62,23 @@ export default async function MemberPage({ params }: PageProps<"/[locale]/member
       </header>
 
       <div className={cn("mt-5 grid items-start gap-5", (links.length > 0 || contact) && "md:grid-cols-[minmax(0,1fr)_16rem]")}>
-        <section aria-label={t("about")} className={cn(panelClass, "p-5 sm:p-6")}>
-          <h2 className="text-sm font-semibold text-fg-subtle">{t("about")}</h2>
+        <section aria-label={t("about")} className={cn(raisedPanelClass, "p-5 sm:p-6")}>
+          <PanelHeading locale={locale}>{t("about")}</PanelHeading>
           {bio ? (
-            <p className="mt-3 max-w-[65ch] text-[1.0625rem] leading-relaxed whitespace-pre-line text-fg-muted">{bio}</p>
+            <p className="mt-4 max-w-[65ch] text-[1.0625rem] leading-relaxed whitespace-pre-line text-fg-muted">{bio}</p>
           ) : (
-            <p className="mt-3 text-fg-subtle">{t("noBio")}</p>
+            <p className="mt-4 text-fg-subtle">{t("noBio")}</p>
           )}
         </section>
 
         {(links.length > 0 || contact) && (
           <div className="grid gap-5">
             {contact && (
-              <section aria-labelledby="contact-heading" className={cn(panelClass, "p-5 sm:p-6")} data-testid="member-contact">
-                <h2 id="contact-heading" className="text-sm font-semibold text-fg-subtle">
+              <section aria-labelledby="contact-heading" className={cn(raisedPanelClass, "p-5 sm:p-6")} data-testid="member-contact">
+                <PanelHeading id="contact-heading" locale={locale}>
                   {t("contact")}
-                </h2>
-                <ul className="mt-3 grid gap-2 text-[0.9375rem]">
+                </PanelHeading>
+                <ul className="mt-4 grid gap-2 text-[0.9375rem]">
                   {contact.phone && (
                     <li className="flex items-center gap-2.5">
                       <Phone aria-hidden className="size-4 shrink-0 text-brand-purple-soft" />
@@ -97,11 +101,11 @@ export default async function MemberPage({ params }: PageProps<"/[locale]/member
               </section>
             )}
         {links.length > 0 && (
-          <section aria-labelledby="links-heading" className={cn(panelClass, "p-5 sm:p-6")}>
-            <h2 id="links-heading" className="text-sm font-semibold text-fg-subtle">
+          <section aria-labelledby="links-heading" className={cn(raisedPanelClass, "p-5 sm:p-6")}>
+            <PanelHeading id="links-heading" locale={locale}>
               {t("links")}
-            </h2>
-            <ul className="mt-3 grid gap-2">
+            </PanelHeading>
+            <ul className="cell-grid pixel-corners mt-4 [--px:3px]">
               {links.map((k) => {
                 const Icon = k === "website" ? Globe : Link2;
                 return (
@@ -110,7 +114,7 @@ export default async function MemberPage({ params }: PageProps<"/[locale]/member
                       href={profile.links[k]}
                       target="_blank"
                       rel="noopener noreferrer nofollow"
-                      className="flex items-center gap-2.5 rounded-md border border-border bg-bg-deep/45 px-3 py-2.5 text-[0.9375rem] font-medium text-fg transition-colors duration-150 hover:border-border-accent"
+                      className="flex min-h-11 items-center gap-2.5 px-3 py-2.5 text-[0.9375rem] font-medium text-fg transition-colors duration-150 hover:bg-surface-hover"
                     >
                       <Icon aria-hidden className="size-4 shrink-0 text-brand-purple-soft" />
                       <span className="grow">{t(`link_${k}`)}</span>
@@ -125,6 +129,7 @@ export default async function MemberPage({ params }: PageProps<"/[locale]/member
         )}
           </div>
         )}
+      </div>
       </div>
     </article>
   );

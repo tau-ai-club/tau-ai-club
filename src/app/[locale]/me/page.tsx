@@ -11,13 +11,14 @@ import { calendarFeedKey } from "@/lib/calendar-access";
 import { createClient } from "@/lib/supabase/server";
 import { signPhotos } from "@/lib/members/photos";
 import { getMemberProfile, getMyContact } from "@/lib/members/profile";
-import { hintClass, panelTitle, raisedPanelClass, smallBtn } from "@/components/admin/styles";
+import { hintClass, raisedPanelClass, smallBtn } from "@/components/admin/styles";
 import { SeasonTimeline } from "@/components/events/season-timeline";
 import { PageBackdrop } from "@/components/site/page-backdrop";
 import { IcebreakersTeaser } from "@/components/events/icebreakers-teaser";
 import { ProfileEditor } from "@/components/members/profile-editor";
 import { MyAttendance } from "@/components/members/my-attendance";
 import { MembersEyebrow } from "@/components/members/members-eyebrow";
+import { PanelHeading } from "@/components/members/panel-heading";
 import { cn } from "@/lib/utils";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/me">): Promise<Metadata> {
@@ -74,15 +75,15 @@ export default async function MePage({ params }: PageProps<"/[locale]/me">) {
       <li
         key={e.slug}
         className={cn(
-          "flex flex-wrap items-center gap-x-4 gap-y-3 rounded-md border px-3.5 py-3",
-          isToday ? "border-border-accent bg-brand-purple/[0.08]" : "border-border bg-bg-deep/45",
+          "flex flex-wrap items-center gap-x-4 gap-y-3 px-3.5 py-3",
+          isToday ? "bg-brand-purple-deeper" : "bg-bg-deep",
         )}
       >
         <time
           dateTime={isoAttr(e.starts_at)}
           className={cn(
-            "grid w-14 shrink-0 place-items-center rounded-md border py-1.5 leading-none text-fg",
-            isToday ? "border-brand-purple bg-brand-purple" : "border-border bg-surface",
+            "pixel-corners grid w-14 shrink-0 place-items-center py-1.5 leading-none text-fg [--px:3px]",
+            isToday ? "bg-brand-purple" : "bg-surface-hover",
           )}
         >
           <span className="font-mono text-[1.375rem] font-bold">{day.format(start)}</span>
@@ -93,7 +94,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/me">) {
             <Link href={`/events/${e.slug}`} className="-my-2.5 inline-block py-2.5 font-semibold text-fg underline-offset-4 hover:underline">
               {title}
             </Link>
-            {isToday && <span className="rounded-full bg-brand-purple px-2 py-0.5 text-[0.75rem] font-semibold text-fg">{t("today")}</span>}
+            {isToday && <span className="pixel-corners bg-brand-purple px-2.5 py-0.5 text-[0.75rem] font-semibold text-fg [--px:2px]">{t("today")}</span>}
           </p>
           <p className="flex flex-wrap gap-x-2 text-sm text-fg-muted">
             <span>{weekday.format(start)}</span>
@@ -144,10 +145,10 @@ export default async function MePage({ params }: PageProps<"/[locale]/me">) {
             className={cn(raisedPanelClass, "grid gap-4 border-brand-purple p-5 shadow-[var(--glow-featured)] sm:p-6")}
             data-testid="me-today"
           >
-            <h2 id="today-heading" className={panelTitle}>
+            <PanelHeading id="today-heading" locale={locale}>
               {t("todayTitle")}
-            </h2>
-            <ul className="grid gap-2.5">{todays.map(eventRow)}</ul>
+            </PanelHeading>
+            <ul className="cell-grid pixel-corners [--px:4px]">{todays.map(eventRow)}</ul>
           </section>
         )}
 
@@ -157,16 +158,16 @@ export default async function MePage({ params }: PageProps<"/[locale]/me">) {
         )}
 
         <section aria-labelledby="upcoming-heading" className={cn(raisedPanelClass, "grid gap-4 p-5 sm:p-6")} data-testid="me-upcoming">
-          <h2 id="upcoming-heading" className={panelTitle}>
+          <PanelHeading id="upcoming-heading" locale={locale}>
             {t("upcomingTitle")}
-          </h2>
+          </PanelHeading>
           {later.length === 0 ? (
             <p className="text-fg-subtle">{t("upcomingEmpty")}</p>
           ) : (
-            <ul className="grid gap-2.5">{later.map(eventRow)}</ul>
+            <ul className="cell-grid pixel-corners [--px:4px]">{later.map(eventRow)}</ul>
           )}
           <div className="grid gap-2 border-t border-border pt-4">
-            <h3 className="font-semibold text-fg">{t("seasonFeedTitle")}</h3>
+            <PanelHeading as="h3" locale={locale} className="text-[0.8125rem]">{t("seasonFeedTitle")}</PanelHeading>
             <p className="max-w-[60ch] text-sm text-fg-muted">{t("seasonFeedBody")}</p>
             <div className="flex flex-wrap gap-2">
               <a href={feed.google} target="_blank" rel="noopener noreferrer" className="btn btn-primary h-10 px-3.5 text-sm">
@@ -186,9 +187,9 @@ export default async function MePage({ params }: PageProps<"/[locale]/me">) {
         {supabase && <MyAttendance supabase={supabase} memberId={viewer.member.id} />}
 
         <section aria-labelledby="sections-heading" className="grid gap-3">
-          <h2 id="sections-heading" className={panelTitle}>
+          <PanelHeading id="sections-heading" locale={locale}>
             {t("sectionsTitle")}
-          </h2>
+          </PanelHeading>
           <ul className="grid gap-3 sm:grid-cols-2">
             {(
               [
@@ -204,7 +205,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/me">) {
                     "group flex h-full items-center gap-4 p-4 transition-colors duration-150 hover:border-border-accent hover:bg-surface-hover",
                   )}
                 >
-                  <span className="grid size-11 shrink-0 place-items-center rounded-md border border-border-accent bg-brand-purple-deeper text-fg [&_svg]:size-5">
+                  <span className="pixel-corners grid size-11 shrink-0 place-items-center bg-brand-purple-deeper shadow-[inset_0_0_0_1px_var(--border-accent)] [--px:3px] text-fg [&_svg]:size-5">
                     <Icon aria-hidden />
                   </span>
                   <span className="grid min-w-0 flex-1 gap-0.5">
