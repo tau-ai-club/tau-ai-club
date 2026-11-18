@@ -9,7 +9,7 @@ import { getSeason } from "@/lib/events";
 import { getPublicSections } from "@/lib/content/data";
 import { contentKindOf } from "@/lib/content/sections";
 import { markdownToText } from "@/lib/content/markdown";
-import { formatEventDate, isoAttr, loc } from "@/lib/event-format";
+import { dbLang, formatEventDate, isoAttr, loc } from "@/lib/event-format";
 import { alternatesFor, shareMetadata } from "@/lib/seo";
 import { Tag } from "@/components/events/event-bits";
 import { ContentIntro, Eyebrow, PageBackdrop, SpeakerList } from "@/components/content/content-bits";
@@ -65,7 +65,7 @@ export default async function LecturesPage({ params }: PageProps<"/[locale]/lect
             <time dateTime={isoAttr(e.starts_at)}>{formatEventDate(e.starts_at, l)}</time>
             {e.state === "past" ? <Tag pixel>{te("past")}</Tag> : <Tag pixel tone={e.state === "next" || e.state === "live" ? "next" : "neutral"}>{t("upcoming")}</Tag>}
           </div>
-          <h3 className="text-xl font-bold text-balance text-fg transition-colors duration-150 group-hover:text-brand-purple-soft sm:text-2xl">
+          <h3 {...dbLang(l)} className="text-xl font-bold text-balance text-fg transition-colors duration-150 group-hover:text-brand-purple-soft sm:text-2xl">
             <Link href={`/lectures/${e.slug}`} className="rounded-sm after:absolute after:inset-0">
               {title}
             </Link>
@@ -97,7 +97,7 @@ export default async function LecturesPage({ params }: PageProps<"/[locale]/lect
           <h2 id="past-lectures" className="text-lg font-bold text-fg-muted">
             {t("past")}
           </h2>
-          <PeopleGrid>{past.map(card)}</PeopleGrid>
+          <PeopleGrid stack maxCols={2}>{past.map(card)}</PeopleGrid>
         </section>
       )}
       {coming.length > 0 && (
@@ -105,7 +105,7 @@ export default async function LecturesPage({ params }: PageProps<"/[locale]/lect
           <h2 id="coming-lectures" className="text-lg font-bold text-fg-muted">
             {t("upcoming")}
           </h2>
-          <PeopleGrid>{coming.map(card)}</PeopleGrid>
+          <PeopleGrid stack maxCols={2}>{coming.map(card)}</PeopleGrid>
         </section>
       )}
     </div>

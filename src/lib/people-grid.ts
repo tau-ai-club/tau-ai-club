@@ -23,12 +23,14 @@ export type PeopleGridLayout = {
 
 const MAX_COLS = 4;
 
-export function peopleGridLayout(n: number): PeopleGridLayout {
-  let cols = Math.max(1, Math.min(n, MAX_COLS));
-  if (n > MAX_COLS) {
-    // Prefer the column count whose last row is fullest; 4 wins ties.
+export function peopleGridLayout(n: number, maxCols: number = MAX_COLS): PeopleGridLayout {
+  const max = Math.max(1, Math.min(maxCols, MAX_COLS));
+  let cols = Math.max(1, Math.min(n, max));
+  if (n > max) {
+    // Prefer the column count whose last row is fullest; the widest wins ties.
+    const candidates = [4, 3].filter((c) => c <= max);
     let best = 0;
-    for (const c of [4, 3]) {
+    for (const c of candidates.length ? candidates : [max]) {
       const fill = (n % c || c) / c;
       if (fill > best) {
         best = fill;

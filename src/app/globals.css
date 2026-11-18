@@ -280,6 +280,12 @@
   .people-grid > [data-pad] {
     display: none;
   }
+  /* `stack` variant: one full-width column on phones. */
+  @media (max-width: 47.99rem) {
+    .people-grid[data-stack] {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
   @media (min-width: 64rem) {
     .people-grid {
       grid-template-columns: repeat(calc(var(--cols) * 2), minmax(0, 1fr));

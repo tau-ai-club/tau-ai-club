@@ -7,7 +7,7 @@ import { requireMember } from "@/lib/auth/viewer";
 import { createClient } from "@/lib/supabase/server";
 import { getSeason } from "@/lib/events";
 import { hasBody } from "@/lib/content/sections";
-import { formatEventDate, isoAttr, loc } from "@/lib/event-format";
+import { dbLang, formatEventDate, isoAttr, loc } from "@/lib/event-format";
 import { Tag } from "@/components/events/event-bits";
 import { ContentIntro, MembersOnlyMark, MembersSoon, PageBackdrop, SpeakerList } from "@/components/content/content-bits";
 import { PeopleGrid } from "@/components/events/people-grid";
@@ -58,7 +58,7 @@ export default async function WorkshopsPage({ params }: PageProps<"/[locale]/wor
       {workshops.length === 0 ? (
         <p className="text-fg-subtle">{t("workshopsEmpty")}</p>
       ) : (
-        <PeopleGrid>
+        <PeopleGrid stack maxCols={3}>
           {workshops.map((w, i) => (
             <li key={w.slug} data-testid="workshop-card" data-tilt="" className="group relative grid min-w-0 content-start gap-3 p-5 sm:p-6">
                 <div className="flex flex-wrap items-center gap-2 text-sm text-fg-muted">
@@ -66,7 +66,7 @@ export default async function WorkshopsPage({ params }: PageProps<"/[locale]/wor
                   {w.state === "past" && <Tag pixel>{te("past")}</Tag>}
                   {(w.state === "next" || w.state === "live") && <Tag pixel tone="next">{te(w.state === "live" ? "happeningNow" : "next")}</Tag>}
                 </div>
-                <h2 className="text-xl font-bold text-balance text-fg transition-colors duration-150 group-hover:text-brand-purple-soft">
+                <h2 {...dbLang(l)} className="text-xl font-bold text-balance text-fg transition-colors duration-150 group-hover:text-brand-purple-soft">
                   <Link href={`/workshops/${w.slug}`} className="rounded-sm after:absolute after:inset-0">
                     {loc(w, "title", l) ?? w.slug}
                   </Link>
