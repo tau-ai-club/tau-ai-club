@@ -1,5 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import type { Locale } from "@/i18n/routing";
+import { intlLocale, type Locale } from "@/i18n/routing";
 import type { SeasonEvent } from "@/lib/data/types";
 import {
   formatEventDate,
@@ -18,7 +18,6 @@ import { Tag } from "./event-bits";
 import { SeasonDial, type DialEvent } from "./season-dial";
 import { initialsOf } from "./speaker-face";
 
-const intlLocale: Record<Locale, string> = { he: "he-IL", en: "en-GB" };
 /** Days of padding before the first and after the last meetup on the dial. */
 const PAD_DAYS = 4;
 

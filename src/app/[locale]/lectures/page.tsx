@@ -58,7 +58,7 @@ export default async function LecturesPage({ params }: PageProps<"/[locale]/lect
   const card = (e: (typeof lectures)[number]) => {
     const title = loc(e, "title", l) ?? e.slug;
     const blurb = sections[e.slug]?.blurb;
-    const blurbText = blurb ? markdownToText((l === "en" ? blurb.body_en : null) || blurb.body_he) : null;
+    const blurbText = blurb ? markdownToText((l !== "he" ? blurb.body_en : null) || blurb.body_he) : null;
     return (
       <li key={e.slug} data-testid="lecture-card" data-tilt="" className="group relative grid min-w-0 content-start gap-4 p-5 sm:p-6">
           <div className="flex flex-wrap items-center gap-2 text-sm text-fg-muted">
@@ -72,7 +72,7 @@ export default async function LecturesPage({ params }: PageProps<"/[locale]/lect
           </h3>
           <SpeakerList event={e} locale={l} size={44} />
           {blurbText ? (
-            <p className="line-clamp-3 max-w-[68ch] text-fg-muted" lang={l === "en" && !blurb?.body_en ? "he" : undefined}>
+            <p className="line-clamp-3 max-w-[68ch] text-fg-muted" lang={l === "he" ? undefined : blurb?.body_en ? "en" : "he"}>
               {blurbText}
             </p>
           ) : (

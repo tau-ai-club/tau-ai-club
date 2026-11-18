@@ -31,7 +31,7 @@ export type EventFile = { id: string; title_he: string; title_en: string; path?:
 
 /** The text to show for a locale, and whether it's the Hebrew text standing in for English. */
 export function bodyFor(row: Pick<ContentRow, "body_he" | "body_en">, locale: string): { text: string; lang: "he" | "en"; fallback: boolean } {
-  if (locale === "en") {
+  if (locale !== "he") {
     if (row.body_en && row.body_en.trim()) return { text: row.body_en, lang: "en", fallback: false };
     return { text: row.body_he, lang: "he", fallback: true };
   }

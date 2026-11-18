@@ -67,7 +67,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         <section aria-labelledby="hero-heading" data-hero="">
           {cohort && (
             <p className="intro flex w-fit items-stretch border border-border-accent text-[0.6875rem] leading-none [--i:0]">
-              {l === "en" ? (
+              {l !== "he" ? (
                 <span lang="en" className="bg-brand-purple px-2.5 py-2 font-pixel tracking-[0.18em] text-on-purple uppercase">
                   {cohort.name_en}
                 </span>
@@ -83,7 +83,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             id="hero-heading"
             className={cn(
               "mt-5 text-[clamp(3rem,12.5vw,6.5rem)] leading-[0.98] font-extrabold text-balance text-fg",
-              l === "en" ? "tracking-[-0.03em]" : "tracking-[-0.015em]",
+              l !== "he" ? "tracking-[-0.03em]" : "tracking-[-0.015em]",
             )}
           >
             <span className="intro block [--i:1]">{t("heroLine1")}</span>
@@ -111,10 +111,10 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       <div className="mx-auto mt-10 max-w-site overflow-hidden px-4 sm:px-8 lg:mt-14">
         <p
           data-band=""
-          {...(l === "en" ? { lang: "en", dir: "ltr" } : {})}
+          {...(l !== "he" ? { lang: l, dir: "ltr" } : {})}
           className={cn(
             "flex items-end border-y border-border py-3 leading-[0.82] whitespace-nowrap text-fg",
-            l === "en"
+            l !== "he"
               ? "font-pixel text-[clamp(2.5rem,11.6vw,9.25rem)]"
               : "text-[clamp(2.75rem,12.5vw,10rem)] font-extrabold tracking-[-0.015em]",
           )}

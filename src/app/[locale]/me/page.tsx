@@ -124,7 +124,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/me">) {
             <h1
               className={cn(
                 "text-[clamp(2rem,7vw,3rem)] leading-[1.05] font-extrabold text-fg",
-                locale === "en" ? "tracking-[-0.02em]" : "tracking-[-0.01em]",
+                locale !== "he" ? "tracking-[-0.02em]" : "tracking-[-0.01em]",
               )}
               data-testid="me-hello"
             >

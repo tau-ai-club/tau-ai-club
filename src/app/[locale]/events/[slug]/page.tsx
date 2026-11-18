@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { routing, type Locale } from "@/i18n/routing";
-import { TIME_ZONE } from "@/i18n/routing";
+import { TIME_ZONE, intlLocale, isLatin } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { getEventBySlug, getEventSlugs, getSeason } from "@/lib/events";
 import {
@@ -77,7 +77,6 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/events/[
   };
 }
 
-const intlLocale: Record<Locale, string> = { he: "he-IL", en: "en-GB" };
 
 /**
  * One meetup. Same world as the home page: the logo grid backdrop, a featured
@@ -193,7 +192,7 @@ export default async function EventPage({ params }: PageProps<"/[locale]/events/
             className={cn(
               "intro mt-5 text-[clamp(2.25rem,7.5vw,4rem)] leading-[1.05] font-extrabold text-balance [--i:1]",
               past ? "text-fg-muted" : "text-fg",
-              l === "en" ? "tracking-[-0.02em]" : "tracking-[-0.01em]",
+              isLatin(l) ? "tracking-[-0.02em]" : "tracking-[-0.01em]",
             )}
           >
             {head}

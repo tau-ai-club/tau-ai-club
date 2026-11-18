@@ -29,7 +29,7 @@ export function SectionHeading({
       data-heading-rise=""
       className={cn(
         "grid text-fg",
-        locale === "en"
+        locale !== "he"
           ? "font-pixel text-[clamp(2.25rem,7vw,4.25rem)] leading-[0.95] tracking-[0.01em] uppercase"
           : "text-[clamp(2.5rem,8vw,4.5rem)] leading-[1.02] font-extrabold tracking-[-0.015em]",
         className,

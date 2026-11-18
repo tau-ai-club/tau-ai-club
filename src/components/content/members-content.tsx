@@ -87,7 +87,7 @@ export function MembersContent({ slug, order, path }: { slug: string; order: rea
           </h2>
           <ul className="mt-4 grid gap-2">
             {data.files.map((f) => {
-              const title = locale === "en" ? f.title_en : f.title_he;
+              const title = locale !== "he" ? f.title_en : f.title_he;
               return (
                 <li key={f.id}>
                   {/* A plain link: the route answers with a short-lived signed URL. */}

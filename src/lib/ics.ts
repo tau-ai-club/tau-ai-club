@@ -8,7 +8,13 @@ import { SITE_URL } from "@/config/site";
 import { getSeason } from "@/lib/events";
 
 /** Feed path per locale. Static files (no query string) so they stay ISR-cached. */
-export const ICS_PATH: Record<Locale, string> = { he: "/calendar.ics", en: "/calendar-en.ics" };
+export const ICS_PATH: Record<Locale, string> = {
+  he: "/calendar.ics",
+  en: "/calendar-en.ics",
+  // No German/French feed: event content is English, so they share the English file.
+  de: "/calendar-en.ics",
+  fr: "/calendar-en.ics",
+};
 
 /**
  * Absolute feed URL, plus the one-click subscribe links built from it. `key` is the members'

@@ -1,5 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import type { Locale } from "@/i18n/routing";
+import { intlLocale, type Locale } from "@/i18n/routing";
 import { TIME_ZONE } from "@/i18n/routing";
 import type { SeasonEvent } from "@/lib/data/types";
 import { formatEventDate, formatShortDate, formatTimeRange, isoAttr, loc, venueIsTbd, venueLabel } from "@/lib/event-format";
@@ -46,7 +46,7 @@ export async function NextEventCard({
   const title = splitTitle(event ? (loc(event, "title", locale) ?? event.slug) : "");
   const venue = event ? venueLabel(event, locale) : null;
   const weekday = (iso: string) =>
-    new Intl.DateTimeFormat(locale === "he" ? "he-IL" : "en-GB", { timeZone: TIME_ZONE, weekday: "short" }).format(new Date(iso));
+    new Intl.DateTimeFormat(intlLocale[locale], { timeZone: TIME_ZONE, weekday: "short" }).format(new Date(iso));
 
   return (
     <section
@@ -74,7 +74,7 @@ export async function NextEventCard({
           </p>
         )}
         {event && !live && daysUntil(event.starts_at, now) > 0 && (
-          <p className={cn("text-[0.8125rem] font-medium text-brand-purple-softer", locale === "en" && "font-mono")}>
+          <p className={cn("text-[0.8125rem] font-medium text-brand-purple-softer", locale !== "he" && "font-mono")}>
             {t("relativeDays", { days: daysUntil(event.starts_at, now) })}
           </p>
         )}

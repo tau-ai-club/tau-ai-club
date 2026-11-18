@@ -100,7 +100,7 @@ export default async function WorkshopPage({ params }: PageProps<"/[locale]/work
               <li key={f.id}>
                 <a href={`/api/files/${f.id}`} className="btn btn-ghost w-full justify-start sm:w-fit" data-testid="file-download">
                   <Download aria-hidden className="size-4" />
-                  {t("download", { title: l === "en" ? f.title_en : f.title_he })}
+                  {t("download", { title: l !== "he" ? f.title_en : f.title_he })}
                 </a>
               </li>
             ))}

@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/lectures
   const description = [
     formatEventDate(event.starts_at, locale),
     speakerNames(event, locale).join(", "),
-    blurb ? markdownToText((locale === "en" ? blurb.body_en : null) || blurb.body_he) : null,
+    blurb ? markdownToText((locale !== "he" ? blurb.body_en : null) || blurb.body_he) : null,
   ]
     .filter(Boolean)
     .join(" · ");

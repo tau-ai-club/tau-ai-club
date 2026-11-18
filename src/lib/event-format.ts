@@ -1,16 +1,17 @@
 import type { Locale } from "@/i18n/routing";
-import { TIME_ZONE } from "@/i18n/routing";
+import { TIME_ZONE, intlLocale } from "@/i18n/routing";
 import type { ClubEvent } from "@/lib/data/types";
 
-/** Pick the `${field}_he` / `${field}_en` column for a locale, falling back to the other language. */
+/**
+ * Pick the `${field}_he` / `${field}_en` column for a locale, falling back to the other language.
+ * Content has Hebrew and English columns only, so German and French read English first, then Hebrew.
+ */
 export function loc<T extends Record<string, unknown>>(row: T, field: string, locale: Locale): string | null {
-  const primary = row[`${field}_${locale}`];
+  const primary = row[`${field}_${locale === "he" ? "he" : "en"}`];
   const fallback = row[`${field}_${locale === "he" ? "en" : "he"}`];
   const value = primary ?? fallback;
   return typeof value === "string" && value.trim() !== "" ? value : null;
 }
-
-const intlLocale: Record<Locale, string> = { he: "he-IL", en: "en-GB" };
 
 /** e.g. he: "יום רביעי, 18 בנובמבר" · en: "Wednesday, 18 November" (Israel time). */
 export function formatEventDate(iso: string, locale: Locale) {
@@ -30,7 +31,8 @@ export function formatShortDate(iso: string, locale: Locale) {
     month: "2-digit",
   })
     .format(new Date(iso))
-    .replace("/", ".");
+    .replace("/", ".")
+    .replace(/\.$/, "");
 }
 
 /** "18:00–20:00" in Israel time (24h in both languages). */

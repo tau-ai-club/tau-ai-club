@@ -18,7 +18,7 @@ export function FlyerChip({ locale, children, className, id }: { locale: Locale;
       id={id}
       className={cn(
         "inline-flex min-h-8 w-fit items-center gap-2.5 rounded-[3px] border-[1.5px] border-brand-purple bg-brand-purple/5 px-3 py-1.5 text-brand-purple-softer",
-        locale === "en" ? "font-pixel text-[0.6875rem] leading-none tracking-[0.16em] uppercase" : "text-[0.8125rem] leading-tight font-medium",
+        locale !== "he" ? "font-pixel text-[0.6875rem] leading-none tracking-[0.16em] uppercase" : "text-[0.8125rem] leading-tight font-medium",
         className,
       )}
     >
@@ -66,7 +66,7 @@ export function InfoTile({
       <dt
         className={cn(
           "text-brand-purple-soft",
-          locale === "en" ? "font-pixel text-[0.6875rem] leading-snug tracking-[0.18em] uppercase" : "text-[0.8125rem] leading-snug font-medium",
+          locale !== "he" ? "font-pixel text-[0.6875rem] leading-snug tracking-[0.18em] uppercase" : "text-[0.8125rem] leading-snug font-medium",
         )}
       >
         {label}
@@ -148,7 +148,7 @@ export function SpeakerAvatar({
 
 /** Role in the posts' small caps: mono caps in English, Rubik 500 in Hebrew. Accent text colour. */
 export function roleCapsClass(locale: Locale) {
-  return locale === "en"
+  return locale !== "he"
     ? "font-mono text-[0.6875rem] leading-snug font-semibold tracking-[0.12em] text-brand-purple-soft uppercase"
     : "text-[0.8125rem] leading-snug font-medium text-brand-purple-soft";
 }

@@ -6,7 +6,8 @@ import { LinkedInIcon } from "./linkedin-icon";
 export async function SiteFooter() {
   const t = await getTranslations("footer");
   const meta = await getTranslations("meta");
-  const en = (await getLocale()) === "en";
+  const locale = await getLocale();
+  const en = locale !== "he";
 
   return (
     <footer className="mt-14 border-t border-border bg-bg-deep">
@@ -26,7 +27,7 @@ export async function SiteFooter() {
           </div>
         </div>
         <p
-          {...(en ? { lang: "en" } : {})}
+          {...(en ? { lang: locale } : {})}
           className={
             en
               ? "flex flex-wrap justify-between gap-x-8 gap-y-2 font-pixel text-[0.6875rem] leading-relaxed tracking-[0.22em] text-fg-subtle uppercase"
