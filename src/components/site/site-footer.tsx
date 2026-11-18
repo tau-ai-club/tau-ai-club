@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { SOCIAL } from "@/config/site";
 import { InstagramIcon } from "./instagram-icon";
 import { LinkedInIcon } from "./linkedin-icon";
@@ -6,6 +6,7 @@ import { LinkedInIcon } from "./linkedin-icon";
 export async function SiteFooter() {
   const t = await getTranslations("footer");
   const meta = await getTranslations("meta");
+  const en = (await getLocale()) === "en";
 
   return (
     <footer className="mt-14 border-t border-border bg-bg-deep">
@@ -25,8 +26,12 @@ export async function SiteFooter() {
           </div>
         </div>
         <p
-          lang="en"
-          className="flex flex-wrap justify-between gap-x-8 gap-y-2 font-pixel text-[0.6875rem] leading-relaxed tracking-[0.22em] text-fg-subtle uppercase"
+          {...(en ? { lang: "en" } : {})}
+          className={
+            en
+              ? "flex flex-wrap justify-between gap-x-8 gap-y-2 font-pixel text-[0.6875rem] leading-relaxed tracking-[0.22em] text-fg-subtle uppercase"
+              : "flex flex-wrap justify-between gap-x-8 gap-y-2 text-[0.8125rem] leading-relaxed font-medium text-fg-subtle"
+          }
         >
           <span className="text-brand-purple-soft">{t("tagline")}</span>
           <span>
