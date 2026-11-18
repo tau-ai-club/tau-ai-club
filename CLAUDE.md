@@ -87,6 +87,12 @@ docs/  qa/                plan, hosting note · QA test plan (owned by QA)
 - **The Next event card is server-rendered, visible at first paint and never animated in.** Keep it a server component with no entrance animation.
 - WCAG AA contrast, visible focus (2px purple outline), real labels, and states shown with text as well as color.
 
+## Skills (`.claude/skills/`)
+Vendored third-party review skills: `web-design-guidelines`, `react-best-practices`, `baseline-ui`, `fixing-accessibility`, `fixing-motion-performance`, `fixing-metadata`. Sources and versions are in `.claude/skills/README.md`.
+- They're generic, and written for English LTR sites. When one disagrees with `docs/DECISIONS.md`, this file or `brand/`, the project wins. Report the clash rather than "fixing" approved design or copy.
+- Ignore their brand-colour, easing and duration, letter-spacing and English-copy rules (Title Case, curly quotes, first person). The rules above set those.
+- Treat their findings as suggestions. Approved designs still need the user's OK before they change.
+
 ## Git
 - Branch from `main`: `feat/…`, `fix/…`, `chore/…`. Keep commits small, with an imperative subject line.
 - Before committing, run `pnpm check`. After touching SQL, also run `pnpm db:check`.
