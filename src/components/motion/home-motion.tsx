@@ -10,7 +10,7 @@ import { ease } from "@/lib/motion";
  *
  * Scroll (skipped under reduced motion and for WebDriver captures, see reveal-on-scroll.tsx):
  *  - [data-mosaic] columns lift off at different speeds as the hero scrolls away;
- *  - [data-band-text] slides sideways while the "LET'S BUILD" band crosses the screen;
+ *  - [data-band-text] slides sideways (toward the reading start) while the tagline band crosses the screen;
  *  - [data-heading-rise] lines rise out of their clip boxes when they enter;
  *  - [data-build] grids build cell by cell, in diagonal order;
  *  - [data-portrait] photos resolve from a 4x4 block of pixels.
@@ -50,10 +50,11 @@ export function HomeMotion() {
           cleanups.push(scroll(anim, { target: hero ?? undefined, offset: ["start start", "end start"] }));
         });
 
-        // Band: drifts left as it crosses the viewport (the text is Latin, so left in both locales).
+        // Band: drifts toward the reading start as it crosses the viewport (left in LTR, right in RTL).
         root.querySelectorAll<HTMLElement>("[data-band-text]").forEach((el) => {
           const band = el.parentElement!;
-          const anim = animate(el, { transform: ["translateX(6%)", "translateX(-14%)"] }, { ease: "linear" });
+          const dir = getComputedStyle(band).direction === "rtl" ? -1 : 1;
+          const anim = animate(el, { transform: [`translateX(${6 * dir}%)`, `translateX(${-14 * dir}%)`] }, { ease: "linear" });
           cleanups.push(scroll(anim, { target: band, offset: ["start end", "end start"] }));
         });
 

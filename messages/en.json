@@ -115,7 +115,8 @@
     "bandOutTitle": "Not in the cohort?",
     "bandOutBody": "Follow us for open events and to hear first when the next cohort opens.",
     "bandLabel": "Log in and updates",
-    "bandLogin": "Log in with your email"
+    "bandLogin": "Log in with your email",
+    "aboutTagline": "Building the next generation of AI leaders"
   },
   "calendarFeed": {
     "description": "Every meetup of the TAU AI Club season. Updates on its own."

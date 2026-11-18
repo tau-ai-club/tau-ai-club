@@ -294,7 +294,7 @@
   .pixel-trail > i {
     position: absolute;
     top: 0;
-    left: 0;
+    left: 0; /* physical on purpose: positioned by clientX in viewport coordinates, same in RTL */
     width: 14px;
     height: 14px;
     opacity: 0;

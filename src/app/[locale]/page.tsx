@@ -67,9 +67,13 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         <section aria-labelledby="hero-heading" data-hero="">
           {cohort && (
             <p className="intro flex w-fit items-stretch border border-border-accent text-[0.6875rem] leading-none [--i:0]">
-              <span lang="en" className="bg-brand-purple px-2.5 py-2 font-pixel tracking-[0.18em] text-on-purple uppercase">
-                {cohort.name_en}
-              </span>
+              {l === "en" ? (
+                <span lang="en" className="bg-brand-purple px-2.5 py-2 font-pixel tracking-[0.18em] text-on-purple uppercase">
+                  {cohort.name_en}
+                </span>
+              ) : (
+                <span className="eyebrow-he bg-brand-purple px-2.5 py-1.5 text-on-purple!">{loc(cohort, "name", l)}</span>
+              )}
               <bdi dir="ltr" className="px-2.5 py-2 font-mono text-[0.75rem] text-fg-muted">
                 {cohortYears(cohort.starts_on, cohort.ends_on)}
               </bdi>
@@ -103,13 +107,17 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         )}
       </div>
 
-      {/* The club's sign-off, set as the page's one big pixel moment. Latin on both locales (Silkscreen is Latin only). */}
+      {/* The club's sign-off, set as the page's one big pixel moment. Silkscreen (Latin) in English, Rubik 800 in Hebrew. */}
       <div className="mx-auto mt-10 max-w-site overflow-hidden px-4 sm:px-8 lg:mt-14">
         <p
-          lang="en"
-          dir="ltr"
           data-band=""
-          className="flex items-end border-y border-border py-3 font-pixel text-[clamp(2.5rem,11.6vw,9.25rem)] leading-[0.82] whitespace-nowrap text-fg rtl:justify-end"
+          {...(l === "en" ? { lang: "en", dir: "ltr" } : {})}
+          className={cn(
+            "flex items-end border-y border-border py-3 leading-[0.82] whitespace-nowrap text-fg",
+            l === "en"
+              ? "font-pixel text-[clamp(2.5rem,11.6vw,9.25rem)]"
+              : "text-[clamp(2.75rem,12.5vw,10rem)] font-extrabold tracking-[-0.015em]",
+          )}
         >
           <span data-band-text="" className="flex items-end">
             <span>{tf("tagline")}</span>

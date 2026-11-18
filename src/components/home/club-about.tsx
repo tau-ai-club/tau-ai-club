@@ -47,10 +47,14 @@ export async function ClubAbout({ locale }: { locale: Locale }) {
           />
         </li>
       </ul>
-      {/* The recruiting post's tagline, in English on both locales (Silkscreen is Latin only). */}
-      <p lang="en" dir="ltr" className="mt-4 font-pixel text-[0.6875rem] tracking-[0.14em] text-fg-subtle rtl:text-end">
-        Building the next generation of AI leaders
-      </p>
+      {/* The recruiting post's tagline: Silkscreen in English, Rubik in Hebrew (Silkscreen has no Hebrew). */}
+      {locale === "en" ? (
+        <p lang="en" dir="ltr" className="mt-4 font-pixel text-[0.6875rem] tracking-[0.14em] text-fg-subtle">
+          {t("aboutTagline")}
+        </p>
+      ) : (
+        <p className="mt-4 text-[0.9375rem] font-medium text-fg-subtle">{t("aboutTagline")}</p>
+      )}
     </section>
   );
 }
