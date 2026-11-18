@@ -11,6 +11,7 @@ export function SectionHeading({ id, locale, line1, line2, className }: { id: st
   return (
     <h2
       id={id}
+      data-heading-rise=""
       className={cn(
         "grid text-fg",
         locale === "en"
@@ -19,10 +20,17 @@ export function SectionHeading({ id, locale, line1, line2, className }: { id: st
         className,
       )}
     >
-      <span>{line1}</span>
-      <span className="flex items-end gap-[0.22em] text-brand-purple-soft">
-        {line2}
-        <Steps />
+      {/* Each line sits in a clip box so it can rise into place on scroll (home-motion.tsx). The padding keeps descenders. */}
+      <span className="-mb-[0.14em] block overflow-clip pb-[0.14em]">
+        <span data-line className="block">
+          {line1}
+        </span>
+      </span>
+      <span className="-mb-[0.14em] block overflow-clip pb-[0.14em]">
+        <span data-line className="flex items-end gap-[0.22em] text-brand-purple-soft">
+          {line2}
+          <Steps />
+        </span>
       </span>
     </h2>
   );

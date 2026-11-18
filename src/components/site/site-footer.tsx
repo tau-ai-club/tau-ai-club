@@ -13,12 +13,12 @@ export async function SiteFooter() {
         <div className="flex flex-wrap items-center justify-between gap-4 lg:justify-start lg:gap-8">
           <p className="max-w-[44ch] text-fg-muted">{t("follow")}</p>
           <div className="flex flex-wrap gap-2">
-            <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" className="btn btn-ghost h-[2.625rem]">
+            <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" data-magnetic="" className="btn btn-ghost h-[2.625rem]">
               <InstagramIcon />
               <bdi dir="ltr">@tau.ai.club</bdi>
             </a>
             {/* Named by its visible text (label in name, WCAG 2.5.3), like the Instagram button. */}
-            <a href={SOCIAL.linkedin} target="_blank" rel="noopener noreferrer" className="btn btn-ghost h-[2.625rem]">
+            <a href={SOCIAL.linkedin} target="_blank" rel="noopener noreferrer" data-magnetic="" className="btn btn-ghost h-[2.625rem]">
               <LinkedInIcon />
               <span>{t("linkedin")}</span>
             </a>

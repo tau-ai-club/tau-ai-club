@@ -26,7 +26,7 @@ function fillFor(col: number, row: number, height: number) {
   return (col + row) % 2 === 0 ? "var(--logo-block)" : "var(--logo-indigo)";
 }
 
-export function PixelMosaic({ className }: { className?: string }) {
+export function PixelMosaic({ className, ...rest }: { className?: string } & React.SVGProps<SVGSVGElement>) {
   const blocks: { x: number; y: number; fill: string; d: number }[] = [];
   HEIGHTS.forEach((h, col) => {
     for (let row = 0; row < h; row++) {
@@ -38,6 +38,7 @@ export function PixelMosaic({ className }: { className?: string }) {
   const size = (n: number) => n * CELL + (n - 1) * GAP;
   return (
     <svg
+      {...rest}
       aria-hidden
       viewBox={`0 0 ${size(COLS)} ${size(ROWS)}`}
       className={cn("pointer-events-none block h-auto", className)}
@@ -55,17 +56,24 @@ export function PixelMosaic({ className }: { className?: string }) {
           strokeWidth={1}
         />
       ))}
-      {blocks.map((b) => (
-        <rect
-          key={`${b.x}-${b.y}`}
-          className="mosaic-block [transform-box:fill-box]"
-          style={{ "--d": b.d } as React.CSSProperties}
-          x={b.x * (CELL + GAP)}
-          y={b.y * (CELL + GAP)}
-          width={CELL}
-          height={CELL}
-          fill={b.fill}
-        />
+      {/* One group per column, so scroll motion (home-motion.tsx) can lift columns without touching the intro on the blocks. */}
+      {Array.from({ length: COLS }, (_, col) => (
+        <g key={`c${col}`} data-mosaic-col={col}>
+          {blocks
+            .filter((b) => b.x === col)
+            .map((b) => (
+              <rect
+                key={`${b.x}-${b.y}`}
+                className="mosaic-block [transform-box:fill-box]"
+                style={{ "--d": b.d } as React.CSSProperties}
+                x={b.x * (CELL + GAP)}
+                y={b.y * (CELL + GAP)}
+                width={CELL}
+                height={CELL}
+                fill={b.fill}
+              />
+            ))}
+        </g>
       ))}
     </svg>
   );

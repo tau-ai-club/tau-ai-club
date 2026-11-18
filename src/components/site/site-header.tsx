@@ -72,6 +72,7 @@ export async function SiteHeader() {
             href={SOCIAL.instagram}
             target="_blank"
             rel="noopener noreferrer"
+            data-magnetic=""
             aria-label={t("instagramLabel")}
             className="inline-flex size-9 items-center justify-center rounded-md text-fg-muted transition-colors duration-150 hover:bg-surface-hover hover:text-fg"
           >
@@ -81,6 +82,7 @@ export async function SiteHeader() {
             href={SOCIAL.linkedin}
             target="_blank"
             rel="noopener noreferrer"
+            data-magnetic=""
             aria-label={t("linkedinLabel")}
             className="inline-flex size-9 items-center justify-center rounded-md text-fg-muted transition-colors duration-150 hover:bg-surface-hover hover:text-fg"
           >

@@ -20,7 +20,7 @@ export async function SeasonSpeakers({ events, locale }: { events: ClubEvent[]; 
   return (
     <section aria-labelledby="season-speakers-heading" data-testid="season-speakers" className="mx-auto max-w-site px-4 pt-20 sm:px-8 lg:pt-28">
       <SectionHeading id="season-speakers-heading" locale={locale} line1={t("speakersLine1")} line2={t("speakersLine2")} />
-      <ul className="cell-grid mt-10 grid-cols-2 lg:grid-cols-4">
+      <ul data-build="" className="cell-grid mt-10 grid-cols-2 lg:grid-cols-4">
         {people.map((sp) => (
           <PersonCard
             key={sp.id}

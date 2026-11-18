@@ -24,7 +24,7 @@ export async function ClubAbout({ locale }: { locale: Locale }) {
         <p className="max-w-[46ch] text-[1.0625rem] leading-relaxed text-pretty text-fg-muted lg:pb-2 lg:text-[1.125rem]">{t("aboutLead")}</p>
       </div>
 
-      <ul className="cell-grid mt-10 md:grid-cols-3">
+      <ul data-build="" className="cell-grid mt-10 md:grid-cols-3">
         {cells.map(({ n, glyph }) => (
           <li key={n} className="grid content-start gap-4 p-6 lg:p-7">
             <PixelIcon glyph={glyph} className="h-11 w-auto" />

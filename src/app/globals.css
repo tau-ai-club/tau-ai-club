@@ -261,11 +261,43 @@
   .cell-grid {
     display: grid;
     gap: 1px;
+    padding: 1px; /* the outer frame is the same background showing through, so it can light up too */
     background: var(--border);
-    border: 1px solid var(--border);
   }
   .cell-grid > * {
     background: var(--bg);
+  }
+  /* Pointer spotlight (home-motion.tsx, mouse only): the grid lines near the cursor turn purple. */
+  .cell-grid[data-spot] {
+    background:
+      radial-gradient(260px circle at var(--mx, -999px) var(--my, -999px), var(--brand-purple), transparent 70%),
+      var(--border);
+  }
+  /* Person cells lean toward the pointer (home-motion.tsx sets --rx/--ry). */
+  [data-tilt] {
+    transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform var(--dur-ui) var(--ease-out);
+  }
+  [data-tilt][data-hover] {
+    z-index: 1;
+    transition-duration: 80ms;
+  }
+
+  /* The pixel trail behind the mouse (home-motion.tsx). */
+  .pixel-trail {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .pixel-trail > i {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 14px;
+    height: 14px;
+    opacity: 0;
   }
 
   /* The hero band's caret: a solid block the height of a Silkscreen cap. */

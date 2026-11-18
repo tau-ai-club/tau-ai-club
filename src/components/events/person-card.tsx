@@ -28,7 +28,7 @@ export function PersonCard({
   testId: string;
 }) {
   return (
-    <li data-testid={testId} className="relative flex min-w-0 flex-col p-4 sm:p-5 lg:p-6">
+    <li data-testid={testId} data-tilt="" className="relative flex min-w-0 flex-col p-4 sm:p-5 lg:p-6">
       <div className="flex items-start justify-between gap-2">
         <PixelPortrait name={name} photoUrl={photoUrl} company={company} />
         <SpeakerLinkedIn url={linkedinUrl} name={name} className="-me-2 -mt-2" />
@@ -51,7 +51,7 @@ function PixelPortrait({ name, photoUrl, company }: { name: string; photoUrl: st
   return (
     <span aria-hidden className="relative block shrink-0" style={{ width: SIZE, height: SIZE }}>
       <span className="pixel-corners absolute inset-0 bg-brand-purple p-[3px]">
-        <span className="pixel-corners relative grid size-full place-items-center overflow-hidden bg-brand-purple-deeper font-bold text-fg [--px:3px]">
+        <span data-portrait="" className="pixel-corners relative grid size-full place-items-center overflow-hidden bg-brand-purple-deeper font-bold text-fg [--px:3px]">
           {photoUrl ? (
             <Image src={photoUrl} alt="" fill sizes={`${SIZE}px`} className="object-cover" />
           ) : (

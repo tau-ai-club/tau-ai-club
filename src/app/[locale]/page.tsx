@@ -12,6 +12,7 @@ import { SeasonSpeakers } from "@/components/events/season-speakers";
 import { ClubFounders } from "@/components/events/club-founders";
 import { ClubAbout } from "@/components/home/club-about";
 import { PixelMosaic } from "@/components/home/pixel-mosaic";
+import { HomeMotion } from "@/components/motion/home-motion";
 import { authEnabled } from "@/lib/supabase/config";
 
 // ISR: re-render at most every 5 minutes (see PUBLIC_REVALIDATE_SECONDS in config/site.ts;
@@ -63,7 +64,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           showSchedule ? "lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-end" : "lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end",
         )}
       >
-        <section aria-labelledby="hero-heading">
+        <section aria-labelledby="hero-heading" data-hero="">
           {cohort && (
             <p className="intro flex w-fit items-stretch border border-border-accent text-[0.6875rem] leading-none [--i:0]">
               <span lang="en" className="bg-brand-purple px-2.5 py-2 font-pixel tracking-[0.18em] text-on-purple uppercase">
@@ -92,7 +93,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         </section>
 
         {!showSchedule ? (
-          <PixelMosaic className="w-44 justify-self-end rtl:-scale-x-100 sm:w-56 lg:w-[22rem]" />
+          <PixelMosaic data-mosaic="" className="w-44 justify-self-end rtl:-scale-x-100 sm:w-56 lg:w-[22rem]" />
         ) : season.status === "ok" ? (
           <NextEventCard event={next} now={season.now} seriesTotal={seriesTotal} />
         ) : (
@@ -107,10 +108,13 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         <p
           lang="en"
           dir="ltr"
+          data-band=""
           className="flex items-end border-y border-border py-3 font-pixel text-[clamp(2.5rem,11.6vw,9.25rem)] leading-[0.82] whitespace-nowrap text-fg rtl:justify-end"
         >
-          <span>{tf("tagline")}</span>
-          <span aria-hidden className="pixel-caret shrink-0" />
+          <span data-band-text="" className="flex items-end">
+            <span>{tf("tagline")}</span>
+            <span aria-hidden className="pixel-caret shrink-0" />
+          </span>
         </p>
       </div>
 
@@ -118,6 +122,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       {showSchedule && season.status === "ok" && <SeasonTimeline events={season.events} now={season.now} cohortName={cohort ? loc(cohort, "name", l) : null} />}
       {season.status === "ok" && <SeasonSpeakers events={season.events} locale={l} />}
       <ClubFounders team={team} locale={l} />
+      <HomeMotion />
     </div>
   );
 }

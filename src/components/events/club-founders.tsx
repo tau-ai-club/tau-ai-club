@@ -17,7 +17,7 @@ export async function ClubFounders({ team, locale }: { team: TeamMember[]; local
   return (
     <section aria-labelledby="club-founders-heading" data-testid="club-founders" className="mx-auto max-w-site px-4 pt-20 sm:px-8 lg:pt-28">
       <SectionHeading id="club-founders-heading" locale={locale} line1={t("foundersLine1")} line2={t("foundersLine2")} />
-      <ul className="cell-grid mt-10 grid-cols-2 lg:grid-cols-4">
+      <ul data-build="" className="cell-grid mt-10 grid-cols-2 lg:grid-cols-4">
         {team.map((m) => (
           <PersonCard
             key={m.id}
