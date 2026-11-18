@@ -31,7 +31,7 @@ export async function MyAttendance({ supabase, memberId }: { supabase: SupabaseC
         <p className="text-fg-muted">{t("attendanceCount", { n: attended.length })}</p>
       </div>
       {attended.length > 0 && (
-        <ul className="cell-grid pixel-corners [--px:3px] [&_a:focus-visible]:outline-offset-[-2px]">
+        <ul className="cell-grid [&_:focus-visible]:outline-offset-[-2px]">
           {attended.map((r) => (
             <li key={r.event.id}>
               <Link

@@ -105,7 +105,7 @@ export default async function MemberPage({ params }: PageProps<"/[locale]/member
                 <PanelHeading id="links-heading" locale={locale}>
                   {t("links")}
                 </PanelHeading>
-                <ul className="cell-grid pixel-corners mt-4 [--px:3px] [&_a:focus-visible]:outline-offset-[-2px]">
+                <ul className="cell-grid mt-4 [&_:focus-visible]:outline-offset-[-2px]">
                   {links.map((k) => {
                     const Icon = k === "website" ? Globe : Link2;
                     return (

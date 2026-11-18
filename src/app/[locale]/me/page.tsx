@@ -148,7 +148,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/me">) {
             <PanelHeading id="today-heading" locale={locale}>
               {t("todayTitle")}
             </PanelHeading>
-            <ul className="cell-grid pixel-corners [--px:4px] [&_a:focus-visible]:outline-offset-[-2px]">{todays.map(eventRow)}</ul>
+            <ul className="cell-grid pixel-corners [--px:4px] [&_:focus-visible]:outline-offset-[-2px]">{todays.map(eventRow)}</ul>
           </section>
         )}
 
@@ -164,7 +164,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/me">) {
           {later.length === 0 ? (
             <p className="text-fg-subtle">{t("upcomingEmpty")}</p>
           ) : (
-            <ul className="cell-grid pixel-corners [--px:4px] [&_a:focus-visible]:outline-offset-[-2px]">{later.map(eventRow)}</ul>
+            <ul className="cell-grid pixel-corners [--px:4px] [&_:focus-visible]:outline-offset-[-2px]">{later.map(eventRow)}</ul>
           )}
           <div className="grid gap-2 border-t border-border pt-4">
             <PanelHeading as="h3" locale={locale} className="text-[0.8125rem]">{t("seasonFeedTitle")}</PanelHeading>
