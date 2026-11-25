@@ -11,6 +11,7 @@ import { raisedPanelClass } from "@/components/admin/styles";
 import { MemberAvatar } from "@/components/members/member-avatar";
 import { ProfileSubline } from "@/components/members/profile-subline";
 import { MembersEyebrow } from "@/components/members/members-eyebrow";
+import { MembersViews } from "@/components/members/members-views";
 import { PixelIcon } from "@/components/home/pixel-icon";
 import { cn } from "@/lib/utils";
 
@@ -48,6 +49,7 @@ export default async function MembersPage({ params }: PageProps<"/[locale]/membe
             <PixelIcon glyph="people" className="h-8 w-auto md:h-10" />
             {t("title")}
           </h1>
+          <MembersViews current="all" />
           <p className="max-w-[60ch] text-[1.0625rem] text-fg-muted">{t("body")}</p>
           {list && list.length > 0 && (
             <p className="text-sm text-fg-subtle" data-testid="members-count">
