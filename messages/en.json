@@ -1066,7 +1066,20 @@
     "count": "{n, plural, one {<b>#</b> member} other {<b>#</b> members}}",
     "you": "(you)",
     "empty": "No members on the list yet.",
-    "error": "We couldn’t load the list. Try refreshing."
+    "error": "We couldn’t load the list. Try refreshing.",
+    "viewsLabel": "Members area views",
+    "viewAll": "All members",
+    "viewLinkedin": "Connect on LinkedIn",
+    "linkedinTitle": "Connect on LinkedIn",
+    "linkedinBody": "Every member who added a LinkedIn link to their profile. Open each profile in a new tab, send a connection request there, and mark it done here.",
+    "linkedinProgress": "<b>{done}</b> of <b>{total}</b>",
+    "linkedinProgressLabel": "LinkedIn connections progress",
+    "linkedinOpen": "Open",
+    "linkedinOpenSr": "{name}'s LinkedIn profile, in a new tab",
+    "linkedinMark": "Mark done",
+    "linkedinDone": "Done",
+    "linkedinEmpty": "No members have added a LinkedIn link yet.",
+    "linkedinLocalNote": "Your marks are saved only in this browser, and only you see them."
   },
   "stalePage": {
     "title": "This page is out of date.",
