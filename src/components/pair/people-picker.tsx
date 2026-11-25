@@ -59,7 +59,11 @@ export function PeoplePicker({
                 defaultChecked={p.checked}
                 disabled={disabled}
                 className="peer sr-only"
-                onChange={(e) => setCount((n) => n + (e.currentTarget.checked ? 1 : -1))}
+                onChange={(e) => {
+                  // Read the box now: React runs the updater later, when e.currentTarget is already null.
+                  const on = e.currentTarget.checked;
+                  setCount((n) => n + (on ? 1 : -1));
+                }}
               />
               <MemberAvatar name={p.name} src={p.photoSrc} size={32} />
               <span className="grid min-w-0 flex-1">
