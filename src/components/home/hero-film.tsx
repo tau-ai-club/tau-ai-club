@@ -122,7 +122,18 @@ function draw(cv: HTMLCanvasElement, c: Colors, t: number, rtl: boolean) {
  */
 export type HeroFilmVideo = { src: string; type?: string; poster: string };
 
-export function HeroFilm({ video }: { video?: HeroFilmVideo } = {}) {
+/**
+ * Where the film sits (25.11: on every page, not only home). "home": the tall hero film, under the
+ * header and the hero. "band": the other pages, behind the header and the title area only, fading
+ * out before the content (long reading and forms stay calm).
+ */
+export type HeroFilmVariant = "home" | "band";
+const PLACE: Record<HeroFilmVariant, string> = {
+  home: "top-0 h-[50rem]",
+  band: "top-0 h-[26rem] lg:h-[32rem] [mask-image:linear-gradient(to_bottom,black_45%,transparent)]",
+};
+
+export function HeroFilm({ video, variant = "home" }: { video?: HeroFilmVideo; variant?: HeroFilmVariant } = {}) {
   const wrap = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const player = useRef<HTMLVideoElement>(null);
@@ -214,8 +225,10 @@ export function HeroFilm({ video }: { video?: HeroFilmVideo } = {}) {
     <div
       ref={wrap}
       aria-hidden
-      className="hero-film pointer-events-none absolute inset-x-0 -top-16 -z-10 h-[46rem] overflow-hidden"
+      className={`hero-film pointer-events-none absolute inset-x-0 -z-10 overflow-hidden ${PLACE[variant]}`}
       data-shown={shown || undefined}
+      data-variant={variant}
+      data-testid="site-film"
     >
       {video ? (
         <video
@@ -237,7 +250,7 @@ export function HeroFilm({ video }: { video?: HeroFilmVideo } = {}) {
 }
 
 /** "Pause background" / "Play background". Hidden under reduced motion, where nothing moves. */
-export function HeroFilmToggle({ pauseLabel, playLabel }: { pauseLabel: string; playLabel: string }) {
+export function HeroFilmToggle({ pauseLabel, playLabel, className }: { pauseLabel: string; playLabel: string; className?: string }) {
   const [paused, setPaused] = useState(false);
   const [gone, setGone] = useState(false); // Save-Data: no film, so no button
   useEffect(() => {
@@ -259,7 +272,8 @@ export function HeroFilmToggle({ pauseLabel, playLabel }: { pauseLabel: string; 
     <button
       type="button"
       onClick={toggle}
-      className="absolute -bottom-12 end-4 inline-flex h-8 items-center gap-2 rounded-full border border-border-strong bg-bg/60 px-3 text-[0.75rem] font-medium text-fg-muted backdrop-blur-sm transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-purple motion-reduce:hidden sm:end-8"
+      data-testid="film-toggle"
+      className={`${className ?? "absolute -bottom-12 end-4 sm:end-8"} inline-flex h-8 items-center gap-2 rounded-full border border-border-strong bg-bg/60 px-3 text-[0.75rem] font-medium text-fg-muted backdrop-blur-sm transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-purple motion-reduce:hidden`}
     >
       <svg aria-hidden viewBox="0 0 12 12" className="size-3" fill="currentColor">
         {paused ? <path d="M3 1.5v9l7.5-4.5z" /> : (

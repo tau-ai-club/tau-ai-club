@@ -3,6 +3,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { getViewer } from "@/lib/auth/viewer";
 import { AdminTabs } from "@/components/admin/admin-tabs";
 import { SignOutButton } from "@/components/auth/auth-buttons";
+import { FilmToggleInline } from "@/components/site/site-film";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -21,6 +22,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/[locale]/a
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <p className={locale === "he" ? "eyebrow-he text-sm" : "eyebrow-pixel text-[0.6875rem]"}>{t("eyebrow")}</p>
           <div className="flex min-w-0 items-center gap-3 text-sm text-fg-subtle">
+            <FilmToggleInline />
             <bdi dir="ltr" className="truncate font-mono text-[0.8125rem]">
               {viewer.email}
             </bdi>
