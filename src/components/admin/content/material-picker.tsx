@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { MATERIAL_KINDS, materialMismatch, type MaterialKind } from "@/lib/content/sections";
+import { MATERIAL_KINDS, materialMismatch, type FileFormat, type MaterialKind } from "@/lib/content/sections";
 import { MaterialIcon } from "./material-icon";
 
 // The same names as the tiles' tabs, so the admin and the members see one word per kind.
@@ -28,7 +28,7 @@ export function MaterialPicker({
   value: MaterialKind;
   onChange: (k: MaterialKind) => void;
   /** What the file is; unknown (nothing picked yet) means no mismatch message. */
-  file: "pdf" | "html" | null;
+  file: FileFormat | null;
   legend: string;
   testId: string;
 }) {

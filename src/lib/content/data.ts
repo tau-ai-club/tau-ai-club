@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createPublicClient } from "@/lib/supabase/public";
-import type { ContentRow, EventFile } from "./sections";
+import { withFormat, type ContentRow, type EventFile } from "./sections";
 
 type PublicSections = Record<string, Partial<Record<ContentRow["section"], Pick<ContentRow, "body_he" | "body_en">>>>;
 
@@ -52,13 +52,13 @@ export async function getEventContent(supabase: SupabaseClient, slug: string) {
       .select("section, body_he, body_en, visibility, status, updated_at")
       .eq("event_id", event.id)
       .eq("status", "published"),
-    supabase.from("event_files").select("id, title_he, title_en, kind, category").eq("event_id", event.id).eq("status", "published"),
+    supabase.from("event_files").select("id, title_he, title_en, kind, category, path").eq("event_id", event.id).eq("status", "published"),
   ]);
   if (error) console.error("[content] event content query failed", error);
   return {
     eventId: event.id as string,
     kind: event.kind as string,
     sections: (sections ?? []) as ContentRow[],
-    files: (files ?? []) as EventFile[],
+    files: ((files ?? []) as EventFile[]).map(withFormat),
   };
 }

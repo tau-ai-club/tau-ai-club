@@ -7,7 +7,9 @@ import { ActionForm } from "@/components/admin/action-form";
 import { dangerBtn, hintClass, inputClass, labelClass, panelClass, panelTitle, smallBtn } from "@/components/admin/styles";
 import { FilePicker } from "@/components/admin/file-picker";
 import { deleteEventFile, setFileCategory, setFileStatus, uploadEventFile } from "@/app/[locale]/admin/content/actions";
-import { defaultMaterial, materialMismatch, materialOf, type EventFile, type MaterialKind } from "@/lib/content/sections";
+import { defaultMaterial, fileFormat, materialMismatch, materialOf, type EventFile, type FileFormat, type MaterialKind } from "@/lib/content/sections";
+import { isDirectFormat } from "@/lib/content/upload";
+import { directUpload } from "./direct-upload";
 import { MaterialIcon } from "./material-icon";
 import { MaterialPicker, useMaterialLabel } from "./material-picker";
 import { cn } from "@/lib/utils";
@@ -17,7 +19,7 @@ export function FilesPanel({ eventId, files }: { eventId: string; files: Require
   const t = useTranslations("content");
   const label = useMaterialLabel();
   // "סוג הקובץ" (26.11) shows once a file is chosen, preselected from it: HTML is a game, a PDF a summary.
-  const [picked, setPicked] = useState<"pdf" | "html" | null>(null);
+  const [picked, setPicked] = useState<FileFormat | null>(null);
   const [material, setMaterial] = useState<MaterialKind>("summary");
   // Whenever the form resets (React resets it after each upload attempt), the chosen file is gone, so
   // the choice goes too. "reset" doesn't bubble: listen while it passes down (capture).
@@ -28,6 +30,32 @@ export function FilesPanel({ eventId, files }: { eventId: string; files: Require
     el?.addEventListener("reset", clear, true);
     return () => el?.removeEventListener("reset", clear, true);
   }, []);
+  // PDFs and decks (≤ 25 MB) skip the Server Action and go straight to Storage (direct-upload.ts);
+  // HTML lessons go through the form's action as before. Caught on the way down (capture), before
+  // React's form action, which skips a submit whose default was prevented.
+  const [direct, setDirect] = useState<{ busy: boolean; pct: number; ok: boolean; message: string } | null>(null);
+  useEffect(() => {
+    const el = formBox.current;
+    if (!el) return;
+    const onSubmit = (e: Event) => {
+      const form = e.target as HTMLFormElement;
+      const file = (form.elements.namedItem("file") as HTMLInputElement | null)?.files?.[0];
+      if (!file || !isDirectFormat(fileFormat(file.name))) return;
+      e.preventDefault();
+      const fd = new FormData(form);
+      setDirect({ busy: true, pct: 0, ok: true, message: "" });
+      void directUpload(
+        { eventId, file, material: String(fd.get("material") ?? ""), title: String(fd.get("title") ?? "") },
+        { tooBig: t("fileErrorSizeDirect"), failed: t("errorFailed"), interrupted: t("fileErrorUpload") },
+        (pct) => setDirect((d) => (d ? { ...d, pct } : d)),
+      ).then((r) => {
+        setDirect({ busy: false, pct: 0, ok: r.ok, message: r.message });
+        if (r.ok) form.reset();
+      });
+    };
+    el.addEventListener("submit", onSubmit, true);
+    return () => el.removeEventListener("submit", onSubmit, true);
+  }, [eventId, t]);
   // A pick that doesn't fit the file: the picker says why, and the button waits for a fitting pick.
   const uploadMismatch = picked ? materialMismatch(material, picked) : null;
   return (
@@ -49,12 +77,12 @@ export function FilesPanel({ eventId, files }: { eventId: string; files: Require
               const input = e.target as unknown as HTMLInputElement;
               if (input.name !== "file") return;
               const name = input.files?.[0]?.name ?? "";
-              setPicked(name ? (/\.html?$/i.test(name) ? "html" : "pdf") : null);
+              setPicked(name ? fileFormat(name) : null);
               setMaterial(defaultMaterial(name));
             }}
           >
             {t("fileChoose")}
-            <FilePicker name="file" accept="application/pdf,.pdf,text/html,.html,.htm" required />
+            <FilePicker name="file" accept="application/pdf,.pdf,text/html,.html,.htm,application/vnd.openxmlformats-officedocument.presentationml.presentation,.pptx" required />
           </label>
           {picked && <MaterialPicker value={material} onChange={setMaterial} file={picked} legend={t("fileCategory")} testId="file-category" />}
           <label className={labelClass}>
@@ -62,10 +90,25 @@ export function FilesPanel({ eventId, files }: { eventId: string; files: Require
             <input name="title" dir="auto" maxLength={200} className={inputClass} />
             <span className={hintClass}>{t("fileTitleHint")}</span>
           </label>
-          <button type="submit" disabled={uploadMismatch !== null} className="btn btn-primary h-11 w-full px-4 disabled:opacity-50 sm:w-fit">
+          <button type="submit" disabled={uploadMismatch !== null || direct?.busy === true} className="btn btn-primary h-11 w-full px-4 disabled:opacity-50 sm:w-fit">
             {t("fileUpload")}
           </button>
         </ActionForm>
+        {direct && (direct.busy || direct.message) && (
+          <p
+            role={direct.busy || direct.ok ? "status" : "alert"}
+            className={cn("mt-3 text-sm", direct.busy || direct.ok ? "text-fg-muted" : "text-destructive")}
+            data-testid="direct-upload-status"
+          >
+            {direct.busy ? (
+              <>
+                {t("fileUploading")} <bdi dir="ltr">{direct.pct}%</bdi>
+              </>
+            ) : (
+              direct.message
+            )}
+          </p>
+        )}
       </div>
 
       <div className="grid gap-2 border-t border-border pt-4">
@@ -141,14 +184,14 @@ function FileKindChange({ file, eventId }: { file: Required<EventFile>; eventId:
         <MaterialPicker
           value={value}
           onChange={setValue}
-          file={file.kind === "lesson" ? "html" : "pdf"}
+          file={fileFormat(file.path)}
           legend={t("fileCategory")}
           testId="file-kind-picker"
         />
         <button
           type="submit"
           className={cn(smallBtn, "w-fit disabled:opacity-50")}
-          disabled={value === current || materialMismatch(value, file.kind === "lesson" ? "html" : "pdf") !== null}
+          disabled={value === current || materialMismatch(value, fileFormat(file.path)) !== null}
           data-testid="file-kind-save"
         >
           {t("fileKindSave")}

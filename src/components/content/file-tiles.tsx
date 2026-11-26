@@ -24,22 +24,30 @@ export type FileKey =
   | "download" | "downloadSlides" | "downloadResources" | "openLesson"
   | "fileTabPdf" | "fileTabLesson" | "fileTabSlides" | "fileTabResources"
   | "fileMetaPdf" | "fileMetaLesson" | "fileMetaSlides" | "fileMetaResources"
-  | "fileCtaPdf" | "fileCtaLesson";
+  | "fileCtaPdf" | "fileCtaLesson"
+  | "fileMetaSlidesPptx" | "downloadSlidesPptx";
 export type T = (key: FileKey, values?: { title: string }) => string;
 export type LinkLike = "a" | ComponentType<{ href: string; className?: string; "aria-label"?: string; "data-testid"?: string; children?: ReactNode }>;
 
 /** What a PDF is. The data passes it in; HTML is always a game, whatever it says. */
 export type FileCategory = "summary" | "slides" | "resources";
-/** A file as the tiles read it: the shared EventFile, plus its category once the data carries it. */
-export type TileFile = EventFile & { category?: string | null };
+/**
+ * A file as the tiles read it: the shared EventFile, plus its category and file format once the
+ * data carries them. A .pptx is always the lecturer's slides; it downloads like a PDF (the site
+ * can't show it), and its tile says PowerPoint instead of PDF.
+ */
+export type TileFile = EventFile & { category?: string | null; format?: string | null };
 export type TileKind = "summary" | "lesson" | "slides" | "resources";
 
 const ORDER: readonly TileKind[] = ["summary", "lesson", "slides", "resources"];
 
 export function kindOf(f: TileFile): TileKind {
   if (f.kind === "lesson") return "lesson";
+  if (f.format === "pptx") return "slides";
   return f.category === "slides" || f.category === "resources" ? f.category : "summary";
 }
+
+const isPptx = (f: TileFile) => f.kind !== "lesson" && f.format === "pptx";
 
 /** Summary, game, slides, resources; the order they came in within each kind. */
 export function orderFiles<F extends TileFile>(files: readonly F[]): F[] {
@@ -105,7 +113,7 @@ export function FileTiles({ files, locale, t, LessonLink }: { files: readonly Ti
 
 function FileTile({ file, title, locale, t, LessonLink }: { file: TileFile; title: string; locale: string; t: T; LessonLink: LinkLike }) {
   const kind = kindOf(file);
-  const copy = COPY[kind];
+  const copy = isPptx(file) ? { ...COPY.slides, meta: "fileMetaSlidesPptx" as const, name: "downloadSlidesPptx" as const } : COPY[kind];
   const lesson = kind === "lesson";
   const en = locale === "en";
   const body = (

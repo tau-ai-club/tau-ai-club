@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { routeClient } from "@/lib/auth/route-client";
 import { hasAuthCookie } from "@/lib/supabase/config";
-import type { ContentRow, EventFile } from "@/lib/content/sections";
+import { withFormat, type ContentRow, type EventFile } from "@/lib/content/sections";
 
 export const dynamic = "force-dynamic";
 
@@ -51,13 +51,13 @@ export async function GET(request: NextRequest, ctx: RouteContext<"/api/events/[
       .eq("event_id", event.id)
       .eq("status", "published")
       .eq("visibility", "members"),
-    supabase.from("event_files").select("id, title_he, title_en, kind, category").eq("event_id", event.id).eq("status", "published"),
+    supabase.from("event_files").select("id, title_he, title_en, kind, category, path").eq("event_id", event.id).eq("status", "published"),
   ]);
   return respond(
     {
       viewer: "member",
       sections: (sections ?? []) as MembersContent["sections"],
-      files: (files ?? []) as EventFile[],
+      files: ((files ?? []) as EventFile[]).map(withFormat),
     },
     apply,
   );

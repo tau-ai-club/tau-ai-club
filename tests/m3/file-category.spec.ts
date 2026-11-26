@@ -55,7 +55,7 @@ test.describe("event material kinds", () => {
 
   test("upload: no pick means the file's default; a pick that doesn't fit is refused with the message", () => {
     const a = src("src/app/[locale]/admin/content/actions.ts");
-    expect(a).toMatch(/const material = isMaterialKind\(picked\) \? picked : ext === "html" \? "game" : "summary";/);
+    expect(a).toMatch(/const material = isMaterialKind\(picked\) \? picked : defaultMaterial\(`x\.\$\{ext\}`\);/);
     expect(a).toMatch(/const mismatch = materialMismatch\(material, ext\);\s*if \(mismatch\) return \{ ok: false, message: t\(mismatch\) \};/);
     // Checked before anything is stored.
     expect(a.indexOf("materialMismatch(material, ext)")).toBeLessThan(a.indexOf('storage.from("event-files").upload'));
@@ -68,7 +68,7 @@ test.describe("event material kinds", () => {
     const body = fn.slice(0, fn.indexOf("\n}\n"));
     expect(body).toMatch(/await adminClient\(\)/);
     expect(body).toMatch(/!isMaterialKind\(material\)/);
-    expect(body).toMatch(/materialMismatch\(material, row\.kind === "lesson" \? "html" : "pdf"\)/);
+    expect(body).toMatch(/materialMismatch\(material, fileFormat\(row\.path\)\)/);
     expect(body).toMatch(/\.update\(\{ category: material \}\)\.eq\("id", id\)\.eq\("kind", "pdf"\)/);
   });
 
@@ -82,7 +82,7 @@ test.describe("event material kinds", () => {
     expect(p).toMatch(/setMaterial\(defaultMaterial\(name\)\)/);
     expect(p).toMatch(/\{picked && <MaterialPicker /);
     // The button waits for a pick that fits (the picker says why); the form reset clears the choice.
-    expect(p).toMatch(/disabled=\{uploadMismatch !== null\}/);
+    expect(p).toMatch(/disabled=\{uploadMismatch !== null \|\| direct\?\.busy === true\}/);
     expect(p).toMatch(/addEventListener\("reset", clear, true\)/);
     expect(p).toMatch(/<ActionForm action=\{setFileCategory\}[\s\S]*?<MaterialPicker/);
     // The tiles' own icons and tab names (tau-designer, file-tiles.tsx), not a second set.
@@ -92,7 +92,7 @@ test.describe("event material kinds", () => {
 
   test("members' pages get each file's category (lecture via the API route, workshop via data.ts)", () => {
     for (const f of ["src/lib/content/data.ts", "src/app/api/events/[slug]/content/route.ts"]) {
-      expect(src(f), f).toMatch(/from\("event_files"\)\.select\("id, title_he, title_en, kind, category"\)/);
+      expect(src(f), f).toMatch(/from\("event_files"\)\.select\("id, title_he, title_en, kind, category, path"\)/);
     }
     expect(src("src/app/[locale]/admin/content/[id]/page.tsx")).toMatch(/kind, category/);
   });

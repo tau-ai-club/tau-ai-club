@@ -39,14 +39,24 @@ export const isFileCategory = (v: unknown): v is FileCategory => typeof v === "s
 export const MATERIAL_KINDS = ["summary", "game", "slides", "resources"] as const;
 export type MaterialKind = (typeof MATERIAL_KINDS)[number];
 export const isMaterialKind = (v: unknown): v is MaterialKind => typeof v === "string" && (MATERIAL_KINDS as readonly string[]).includes(v);
-/** The default for a chosen file: HTML is a game, a PDF is a summary (so Ido does nothing extra). */
-export const defaultMaterial = (fileName: string): MaterialKind => (/\.html?$/i.test(fileName) ? "game" : "summary");
+/** What a file is on disk: a PDF, an HTML lesson, or a PowerPoint (lecturer's slides only, 26.11). */
+export type FileFormat = "pdf" | "html" | "pptx";
+export const fileFormat = (name: string): FileFormat => (/\.html?$/i.test(name) ? "html" : /\.pptx$/i.test(name) ? "pptx" : "pdf");
+/** The default for a chosen file: HTML is a game, a PowerPoint the lecturer's slides, a PDF a summary (so Ido does nothing extra). */
+export const defaultMaterial = (fileName: string): MaterialKind => ({ html: "game", pptx: "slides", pdf: "summary" } as const)[fileFormat(fileName)];
+export type MismatchKey = "fileKindMismatchGame" | "fileKindMismatchPdf" | "fileKindMismatchPptx";
 /** null when the pick fits the file; otherwise which message to show. */
-export const materialMismatch = (kind: MaterialKind, file: "pdf" | "html"): "fileKindMismatchGame" | "fileKindMismatchPdf" | null =>
-  file === "pdf" ? (kind === "game" ? "fileKindMismatchGame" : null) : kind === "game" ? null : "fileKindMismatchPdf";
+export const materialMismatch = (kind: MaterialKind, file: FileFormat): MismatchKey | null => {
+  if (file === "pptx") return kind === "slides" ? null : "fileKindMismatchPptx";
+  if (file === "pdf") return kind === "game" ? "fileKindMismatchGame" : null;
+  return kind === "game" ? null : "fileKindMismatchPdf";
+};
 /** A stored file's kind, for the picker and the tag. */
 export const materialOf = (f: Pick<EventFile, "kind" | "category">): MaterialKind => (f.kind === "lesson" ? "game" : (f.category ?? "summary"));
-export type EventFile = { id: string; title_he: string; title_en: string; kind?: "pdf" | "lesson"; category?: FileCategory; path?: string; status?: ContentStatus };
+// kind 'pdf' means a file members download (a PDF or, for slides, a .pptx); `format` says which.
+export type EventFile = { id: string; title_he: string; title_en: string; kind?: "pdf" | "lesson"; category?: FileCategory; format?: FileFormat; path?: string; status?: ContentStatus };
+/** Members' file rows: the format from the path, then the path itself left out (members never need it). */
+export const withFormat = <F extends { path?: string | null }>({ path, ...f }: F): Omit<F, "path"> & { format: FileFormat } => ({ ...f, format: fileFormat(path ?? "") });
 
 /** The text to show for a locale, and whether it's the Hebrew text standing in for English. */
 export function bodyFor(row: Pick<ContentRow, "body_he" | "body_en">, locale: string): { text: string; lang: "he" | "en"; fallback: boolean } {
