@@ -15,7 +15,7 @@
 import { checkPptx, PPTX_MIME } from "./pptx";
 import type { FileFormat } from "./sections";
 
-/** PDFs and decks: the bucket's limit too (migration 20261126190000). */
+/** PDFs and decks: the bucket's limit too (migration 20261126180000). */
 export const MAX_DIRECT_BYTES = 25 * 1024 * 1024;
 /** HTML lessons, through the Server Action. */
 export const MAX_ACTION_BYTES = 3 * 1024 * 1024;

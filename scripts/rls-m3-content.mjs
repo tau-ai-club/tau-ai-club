@@ -184,7 +184,7 @@ export async function runContentChecks(db, check) {
     deckBucket.m.includes("application/vnd.openxmlformats-officedocument.presentationml.presentation") && !deckBucket.m.some((m) => /macro|ms-powerpoint|octet/i.test(m)),
     "the bucket accepts .pptx (no macro-enabled or legacy PowerPoint types)",
   );
-  check(Number(deckBucket.l) === 26214400, "the bucket's size limit is 25 MB (20261126190000)");
+  check(Number(deckBucket.l) === 26214400, "the bucket's size limit is 25 MB");
   await db.query("insert into storage.objects (bucket_id, name) values ('event-files', $1)", [deck]);
   const deckFor = (who) => as(who, "select name from storage.objects where bucket_id = 'event-files' and name = $1", [deck]);
   check((await deckFor("alice")).rows?.length === 0, "member: a draft .pptx can't be read");
@@ -192,7 +192,7 @@ export async function runContentChecks(db, check) {
   check((await deckFor("alice")).rows?.length === 1, "member: a published .pptx can be downloaded");
   check(denied(await deckFor("guest")) || (await deckFor("guest")).rows?.length === 0, "guest: can't read a .pptx");
   await db.query("delete from storage.objects where bucket_id = 'event-files' and name = $1", [deck]);
-  // Staged direct uploads (20261126190000): no row points at them, so nobody but admins sees them.
+  // Staged direct uploads (direct upload path, 26.11): no row points at them, so nobody but admins sees them.
   const staged = "_incoming/00000000-0000-4000-8000-0000000000aa.pptx";
   await db.query("insert into storage.objects (bucket_id, name) values ('event-files', $1)", [staged]);
   for (const who of ["alice", "outsider"]) {
