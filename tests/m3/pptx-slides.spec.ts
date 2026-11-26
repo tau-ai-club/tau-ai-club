@@ -64,6 +64,10 @@ test.describe("PowerPoint slides", () => {
     expect(checkPptx(zip([...DECK, "ppt/vbaProject.bin"]))).toEqual({ ok: false, reason: "unsafe" });
     expect(checkPptx(zip([...DECK, "ppt/activeX/activeX1.xml"]))).toEqual({ ok: false, reason: "unsafe" });
     expect(checkPptx(zip([...DECK, "ppt/embeddings/oleObject1.bin"]))).toEqual({ ok: false, reason: "unsafe" });
+    // Names dressed up with a backslash or a leading slash (tau-security L1).
+    expect(checkPptx(zip([...DECK, "ppt\\vbaProject.bin"]))).toEqual({ ok: false, reason: "unsafe" });
+    expect(checkPptx(zip([...DECK, "/ppt/vbaProject.bin"]))).toEqual({ ok: false, reason: "unsafe" });
+    expect(checkPptx(zip([...DECK, "ppt\\slides\\slide2.xml"]))).toEqual({ ok: false, reason: "unsafe" });
   });
 
   test("a crafted header can't hide an entry by jumping over it (tau-security low note)", () => {

@@ -48,7 +48,14 @@ export function checkPptx(bytes: Uint8Array): PptxCheck {
   const lower = names.map((n) => n.toLowerCase());
   if (!lower.includes("[content_types].xml") || !lower.includes("ppt/presentation.xml")) return { ok: false, reason: "type" };
   const unsafe = lower.some(
-    (n) => n.endsWith("vbaproject.bin") || n.startsWith("ppt/activex/") || (n.startsWith("ppt/embeddings/") && n.endsWith(".bin")),
+    (n) =>
+      // A real deck never names an entry with a backslash or from the root; such names could dress
+      // up "ppt\vbaProject.bin" past the tests below (tau-security L1, 26.11).
+      n.includes("\\") ||
+      n.startsWith("/") ||
+      n.endsWith("vbaproject.bin") ||
+      n.startsWith("ppt/activex/") ||
+      (n.startsWith("ppt/embeddings/") && n.endsWith(".bin")),
   );
   return unsafe ? { ok: false, reason: "unsafe" } : { ok: true };
 }
