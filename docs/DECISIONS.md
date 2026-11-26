@@ -13,6 +13,7 @@ Open questions (not decided yet) live in `docs/OPEN-QUESTIONS.md`.
 
 | Date | Decision | Area | Where it lives |
 |---|---|---|---|
+| 26.11 | **Lecturer's slides up to 25 MB.** Big files go straight from the admin's browser to Storage with a one-time, admin-only signed upload URL; the server checks the stored file before listing it. Security review before going live. | Content | files editor, Storage |
 | 26.11 | **Lecturer's slides may be PowerPoint (.pptx) too.** A .pptx uploads only as מצגת המרצה and is download-only for members (the site can't show it); a PDF still opens on the site. Summaries, resources and games are unchanged. | Content | `event_files`, files editor, Storage |
 | 26.11 | **Lesson 1 (Shai Yahal) summary as a PDF in Oz's style**, same wording; it goes up as a second summary next to the existing PDF, and the long summary/goals/takeaways text on the page is hidden (blurb stays). | Content | cohort-02-opening |
 | 26.11 | **No 'pause background' button anywhere.** The moving film/band stays on every page (home included) with no stop button; the user said it bothers no one. prefers-reduced-motion still turns motion off. Before/after pictures to the user before build. | Look | SiteFilm / HeroFilm |
