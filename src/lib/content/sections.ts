@@ -27,7 +27,26 @@ export type ContentRow = {
   updated_at?: string;
 };
 
-export type EventFile = { id: string; title_he: string; title_en: string; kind?: "pdf" | "lesson"; path?: string; status?: ContentStatus };
+/** What a PDF is (DECISIONS 26.11): Ido's summary (the default), the lecturer's slides, or resources. An HTML lesson is always a game. */
+export const FILE_CATEGORIES = ["summary", "slides", "resources"] as const;
+export type FileCategory = (typeof FILE_CATEGORIES)[number];
+export const isFileCategory = (v: unknown): v is FileCategory => typeof v === "string" && (FILE_CATEGORIES as readonly string[]).includes(v);
+/**
+ * What the uploader says a file is (26.11): the four kinds of event material. A game is an HTML lesson
+ * (event_files.kind = 'lesson'); the other three are PDFs (event_files.category). Nothing is fixed
+ * silently: a pick that doesn't fit the file is refused with a message (fileKindMismatch*).
+ */
+export const MATERIAL_KINDS = ["summary", "game", "slides", "resources"] as const;
+export type MaterialKind = (typeof MATERIAL_KINDS)[number];
+export const isMaterialKind = (v: unknown): v is MaterialKind => typeof v === "string" && (MATERIAL_KINDS as readonly string[]).includes(v);
+/** The default for a chosen file: HTML is a game, a PDF is a summary (so Ido does nothing extra). */
+export const defaultMaterial = (fileName: string): MaterialKind => (/\.html?$/i.test(fileName) ? "game" : "summary");
+/** null when the pick fits the file; otherwise which message to show. */
+export const materialMismatch = (kind: MaterialKind, file: "pdf" | "html"): "fileKindMismatchGame" | "fileKindMismatchPdf" | null =>
+  file === "pdf" ? (kind === "game" ? "fileKindMismatchGame" : null) : kind === "game" ? null : "fileKindMismatchPdf";
+/** A stored file's kind, for the picker and the tag. */
+export const materialOf = (f: Pick<EventFile, "kind" | "category">): MaterialKind => (f.kind === "lesson" ? "game" : (f.category ?? "summary"));
+export type EventFile = { id: string; title_he: string; title_en: string; kind?: "pdf" | "lesson"; category?: FileCategory; path?: string; status?: ContentStatus };
 
 /** The text to show for a locale, and whether it's the Hebrew text standing in for English. */
 export function bodyFor(row: Pick<ContentRow, "body_he" | "body_en">, locale: string): { text: string; lang: "he" | "en"; fallback: boolean } {

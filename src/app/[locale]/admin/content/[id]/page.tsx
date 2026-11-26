@@ -27,7 +27,7 @@ export default async function AdminContentEditPage({ params }: PageProps<"/[loca
   const [{ data: event }, { data: rows }, { data: files }] = await Promise.all([
     supabase.from("events").select("id, slug, kind, title_he, title_en, starts_at").eq("id", id).maybeSingle(),
     supabase.from("event_content").select("id, section, body_he, body_en, visibility, status, updated_at").eq("event_id", id),
-    supabase.from("event_files").select("id, path, title_he, title_en, status, kind").eq("event_id", id).order("created_at"),
+    supabase.from("event_files").select("id, path, title_he, title_en, status, kind, category").eq("event_id", id).order("created_at"),
   ]);
   if (!event) notFound();
   const kind = contentKindOf(event.kind);

@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { adminClient, getViewer } from "@/lib/auth/viewer";
 import { revalidatePublicContent, str } from "@/lib/admin/content";
-import { CONTENT_SECTIONS, type ContentSection } from "@/lib/content/sections";
+import { CONTENT_SECTIONS, isMaterialKind, materialMismatch, type ContentSection, type FileCategory } from "@/lib/content/sections";
 import { readLessonUpload } from "@/lib/content/lesson";
 import type { ActionState } from "@/components/admin/action-form";
 
@@ -81,6 +81,11 @@ export async function uploadEventFile(_: ActionState, fd: FormData): Promise<Act
     ext = "html";
     body = new TextEncoder().encode(lesson.html);
   }
+  // What the uploader says it is (26.11). No pick (an older form) means the file's default.
+  const picked = str(fd, "material");
+  const material = isMaterialKind(picked) ? picked : ext === "html" ? "game" : "summary";
+  const mismatch = materialMismatch(material, ext);
+  if (mismatch) return { ok: false, message: t(mismatch) };
 
   const { data: event } = await supabase.from("events").select("slug").eq("id", eventId).maybeSingle();
   if (!event) return { ok: false, message: t("errorFailed") };
@@ -102,9 +107,11 @@ export async function uploadEventFile(_: ActionState, fd: FormData): Promise<Act
   // One "title" field (24.11: one simple upload form), used for both languages. The older per-language
   // fields still win when a form sends them.
   const title = (k: string) => (str(fd, k) || str(fd, "title")).slice(0, 200) || file.name.slice(0, 200);
+  // A game is the HTML itself (kind 'lesson'); its category column stays the default.
+  const category: FileCategory = material === "game" ? "summary" : material;
   const { error } = await supabase
     .from("event_files")
-    .upsert({ event_id: eventId, path, title_he: title("title_he"), title_en: title("title_en"), status: "published" }, { onConflict: "path" });
+    .upsert({ event_id: eventId, path, title_he: title("title_he"), title_en: title("title_en"), status: "published", category }, { onConflict: "path" });
   if (error) {
     console.error("[content] file row failed", error.code);
     return { ok: false, message: t("errorFailed") };
@@ -123,6 +130,25 @@ export async function setFileStatus(_: ActionState, fd: FormData): Promise<Actio
     .from("event_files")
     .update({ status: str(fd, "status") === "published" ? "published" : "draft" })
     .eq("id", id);
+  if (error) return { ok: false, message: t("errorFailed") };
+  refresh(eventId);
+  return { ok: true, message: t("saved") };
+}
+
+/** Change a file's kind from the files list, without uploading it again. A pick that doesn't fit the file is refused with a message. */
+export async function setFileCategory(_: ActionState, fd: FormData): Promise<ActionState> {
+  const supabase = await adminClient();
+  const t = await getTranslations("content");
+  const id = str(fd, "id");
+  const eventId = str(fd, "event_id");
+  const material = str(fd, "material");
+  if (!UUID.test(id) || !UUID.test(eventId) || !isMaterialKind(material)) return { ok: false, message: t("errorFailed") };
+  const { data: row } = await supabase.from("event_files").select("kind").eq("id", id).maybeSingle();
+  if (!row) return { ok: false, message: t("errorFailed") };
+  const mismatch = materialMismatch(material, row.kind === "lesson" ? "html" : "pdf");
+  if (mismatch) return { ok: false, message: t(mismatch) };
+  if (material === "game") return { ok: true, message: t("saved") }; // already a game: nothing to store
+  const { error } = await supabase.from("event_files").update({ category: material }).eq("id", id).eq("kind", "pdf");
   if (error) return { ok: false, message: t("errorFailed") };
   refresh(eventId);
   return { ok: true, message: t("saved") };

@@ -736,7 +736,12 @@
     "lessonMetaTitle": "שיעור אינטראקטיבי",
     "lessonBack": "חזרה לעמוד המפגש",
     "lessonSaved": "התשובות שלך נשמרות בדפדפן הזה.",
-    "lessonFrameTitle": "שיעור אינטראקטיבי: {title}"
+    "lessonFrameTitle": "שיעור אינטראקטיבי: {title}",
+    "fileCategory": "סוג הקובץ",
+    "fileKindSave": "שמירת הסוג",
+    "fileKindMismatchGame": "משחק הוא קובץ HTML. לקובץ PDF בחרו סיכום, מצגת המרצה או חומר עזר.",
+    "fileKindMismatchPdf": "סיכום, מצגת המרצה וחומר עזר הם קובצי PDF. לקובץ HTML בחרו משחק.",
+    "fileKindChange": "שינוי סוג הקובץ"
   },
   "comingSoon": {
     "eyebrow": "אזור החברים",

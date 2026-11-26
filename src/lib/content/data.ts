@@ -52,7 +52,7 @@ export async function getEventContent(supabase: SupabaseClient, slug: string) {
       .select("section, body_he, body_en, visibility, status, updated_at")
       .eq("event_id", event.id)
       .eq("status", "published"),
-    supabase.from("event_files").select("id, title_he, title_en, kind").eq("event_id", event.id).eq("status", "published"),
+    supabase.from("event_files").select("id, title_he, title_en, kind, category").eq("event_id", event.id).eq("status", "published"),
   ]);
   if (error) console.error("[content] event content query failed", error);
   return {

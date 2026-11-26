@@ -142,6 +142,23 @@ export async function runContentChecks(db, check) {
   check((await objects("alice")).rows?.length === 0, "member: an unpublished file can't be downloaded any more");
   await db.query("update public.event_files set status = 'published' where path = $1", [pdf]);
 
+  // ---- file category (20261126120000_event_file_category.sql) ----------------------
+  const cat = async (path) => (await db.query("select category from public.event_files where path = $1", [path])).rows[0]?.category;
+  check((await db.query("select count(*)::int as n from public.event_files where category <> 'summary'")).rows[0].n === 0, "every existing file is a summary (the default)");
+  check(await cat(pdf) === "summary", "a PDF added without a category is a summary");
+  const toSlides = await as("admin", "update public.event_files set category = 'slides' where path = $1 returning category", [pdf]);
+  check(!toSlides.error && toSlides.rows?.[0]?.category === "slides", "admin: can mark a PDF as the lecturer's slides");
+  check(!(await as("admin", "update public.event_files set category = 'resources' where path = $1", [pdf])).error && (await cat(pdf)) === "resources", "admin: can mark a PDF as resources");
+  check(Boolean((await as("admin", "update public.event_files set category = 'video' where path = $1", [pdf])).error), "category is only summary, slides or resources");
+  for (const who of ["alice", "outsider"]) {
+    await as(who, "update public.event_files set category = 'summary' where path = $1", [pdf]);
+    check((await cat(pdf)) === "resources", `${who}: cannot change a file's category`);
+  }
+  check(Boolean((await as("guest", "update public.event_files set category = 'summary' where path = $1", [pdf])).error), "guest: cannot change a file's category");
+  check((await as("alice", "select category from public.event_files where path = $1", [pdf])).rows?.[0]?.category === "resources", "member: reads the category of a published file");
+  check(Boolean((await as("guest", "select category from public.event_files")).error), "guest: still no access to event_files");
+  await db.query("update public.event_files set category = 'summary' where path = $1", [pdf]);
+
   // ---- interactive HTML lessons (20261124000000_event_lessons.sql) ----------------
   const lesson = "cohort-02-opening/how-ai-agents-work.html";
   const addLesson = await as("admin", "insert into public.event_files (event_id, path, title_he, title_en, status) values ($1, $2, 'שיעור', 'Lesson', 'draft') returning kind", [opener, lesson]);
@@ -152,6 +169,8 @@ export async function runContentChecks(db, check) {
     check(Boolean(r.error), `event_files.path refuses ${p} (only .pdf and .html)`);
   }
   check(Boolean((await as("admin", "update public.event_files set kind = 'pdf' where path = $1", [lesson])).error), "kind can't be set by hand (generated from the path)");
+  check(Boolean((await as("admin", "update public.event_files set category = 'slides' where path = $1", [lesson])).error), "an HTML lesson can't be slides or resources (it's always a game)");
+  check(Boolean((await as("admin", "insert into public.event_files (event_id, path, title_he, title_en, category) values ($1, 'cohort-02-opening/x2.html', 'x', 'x', 'resources')", [opener])).error), "a new HTML lesson can't be filed as resources");
   for (const who of ["alice", "outsider"]) {
     check(
       denied(await as(who, "insert into public.event_files (event_id, path, title_he, title_en, status) values ($1, 'cohort-02-opening/evil.html', 'x', 'x', 'published')", [opener])),
