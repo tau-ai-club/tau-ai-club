@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { MAX_ACTION_BYTES, MAX_DIRECT_BYTES, checkFileBytes, contentTypeFor, isDirectFormat, stagedFormat, stagedPath, storageName } from "../../src/lib/content/upload";
 
@@ -103,9 +103,10 @@ test.describe("direct uploads (PDF and PowerPoint, up to 25 MB)", () => {
     }
   });
 
-  test("migration: only the bucket's size limit changes, to 25 MB", () => {
-    const sql = src("supabase/migrations/20261126190000_event_files_25mb.sql").replace(/--.*$/gm, "").trim();
-    expect(sql).toBe("update storage.buckets\n  set file_size_limit = 26214400\n  where id = 'event-files';");
+  test("one migration for pptx and 25 MB (the user runs SQL once): the bucket's limit is 25 MB", () => {
+    const sql = src("supabase/migrations/20261126180000_event_file_pptx.sql").replace(/--.*$/gm, "");
+    expect(sql).toMatch(/file_size_limit = 26214400\s+where id = 'event-files';/);
     expect(26214400).toBe(MAX_DIRECT_BYTES);
+    expect(existsSync(resolve(ROOT, "supabase/migrations/20261126190000_event_files_25mb.sql"))).toBe(false);
   });
 });

@@ -120,7 +120,7 @@ test.describe("PowerPoint slides", () => {
     expect(sql).toMatch(/when path ~ '\\\.pptx\$' then category = 'slides'/);
     expect(sql).toMatch(/drop constraint if exists event_files_category_pdf_only/);
     expect(sql).toMatch(/'application\/vnd\.openxmlformats-officedocument\.presentationml\.presentation'/);
-    expect(sql).not.toMatch(/file_size_limit|\bgrant\b|\bcreate policy\b|security definer/i);
+    expect(sql).not.toMatch(/\bgrant\b|\bcreate policy\b|security definer/i);
   });
 
   test("messages in both languages", () => {
