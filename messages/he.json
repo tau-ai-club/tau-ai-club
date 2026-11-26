@@ -731,6 +731,8 @@
     "fileMetaResources": "PDF · חומר נוסף לקריאה",
     "downloadSlides": "הורדת המצגת: {title}",
     "downloadResources": "הורדת חומר עזר: {title}",
+    "fileMetaSlidesPptx": "PowerPoint · להורדה",
+    "downloadSlidesPptx": "הורדת המצגת (PowerPoint): {title}",
     "lessonMetaTitle": "שיעור אינטראקטיבי",
     "lessonBack": "חזרה לעמוד המפגש",
     "lessonSaved": "התשובות שלך נשמרות בדפדפן הזה.",

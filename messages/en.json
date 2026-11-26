@@ -731,6 +731,8 @@
     "fileMetaResources": "PDF · extra reading",
     "downloadSlides": "Download slides: {title}",
     "downloadResources": "Download resource: {title}",
+    "fileMetaSlidesPptx": "PowerPoint · download",
+    "downloadSlidesPptx": "Download slides (PowerPoint): {title}",
     "lessonMetaTitle": "Interactive lesson",
     "lessonBack": "Back to the event",
     "lessonSaved": "Your answers are saved in this browser.",

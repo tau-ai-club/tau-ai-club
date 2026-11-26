@@ -129,3 +129,22 @@ for (const locale of ["he", "en"] as const) {
     expect(await noSidewaysScroll(page)).toBe(true);
   });
 }
+
+for (const locale of ["he", "en"] as const) {
+  test(`${locale}: a PowerPoint deck is the slides tile, says PowerPoint, and downloads`, async ({ page }) => {
+    const he_ = locale === "he";
+    // A .pptx: kind pdf (it downloads), category slides. Even with no category it reads as slides.
+    const PPTX: TileFile = { id: "55555555-5555-4555-8555-555555555555", title_he: "המצגת של המרצה", title_en: "The lecturer's deck", kind: "pdf", format: "pptx" };
+    const tiles = await place(page, locale, [PPTX, KINDS[3]]);
+    const items = tiles.locator(":scope > li");
+    expect(await items.evaluateAll((els) => els.map((e) => e.getAttribute("data-kind")))).toEqual(["summary", "slides"]);
+    const link = items.nth(1).getByRole("link");
+    await expect(link).toHaveAttribute("href", `/api/files/${PPTX.id}`);
+    await expect(link).toHaveAccessibleName(he_ ? "הורדת המצגת (PowerPoint): המצגת של המרצה" : "Download slides (PowerPoint): The lecturer's deck");
+    await expect(link.locator("span").first()).toHaveText(he_ ? "מצגת המרצה" : "Slides");
+    await expect(link).toContainText(he_ ? "PowerPoint · להורדה" : "PowerPoint · download");
+    await expect(link).not.toContainText("PDF");
+    await expect(link).toContainText(he_ ? "להורדה" : "Download");
+    expect(await noSidewaysScroll(page)).toBe(true);
+  });
+}
