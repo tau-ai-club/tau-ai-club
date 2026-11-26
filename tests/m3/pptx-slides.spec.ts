@@ -66,6 +66,23 @@ test.describe("PowerPoint slides", () => {
     expect(checkPptx(zip([...DECK, "ppt/embeddings/oleObject1.bin"]))).toEqual({ ok: false, reason: "unsafe" });
   });
 
+  test("a crafted header can't hide an entry by jumping over it (tau-security low note)", () => {
+    const bytes = zip([...DECK, "ppt/vbaProject.bin"]);
+    // Give the first central header a huge comment length, so a scanner that skips ahead by a
+    // header's own lengths would jump past every later entry, the macro included.
+    const firstCentral = bytes.findIndex((b, i) => b === 0x50 && bytes[i + 1] === 0x4b && bytes[i + 2] === 0x01 && bytes[i + 3] === 0x02);
+    new DataView(bytes.buffer).setUint16(firstCentral + 32, 0xffff, true);
+    expect(zipEntryNames(bytes)).toContain("ppt/vbaProject.bin");
+    expect(checkPptx(bytes)).toEqual({ ok: false, reason: "unsafe" });
+    // Hidden only in a local header (no central entry) is still seen.
+    const localOnly = zip(DECK);
+    const extra = zip(["ppt/vbaProject.bin"]).subarray(0, 30 + "ppt/vbaProject.bin".length);
+    const both = new Uint8Array(localOnly.length + extra.length);
+    both.set(localOnly);
+    both.set(extra, localOnly.length);
+    expect(checkPptx(both)).toEqual({ ok: false, reason: "unsafe" });
+  });
+
   test("a .pptx is the lecturer's slides only: preselected, and anything else gets a message", () => {
     expect(fileFormat("Deck.PPTX")).toBe("pptx");
     expect(defaultMaterial("deck.pptx")).toBe("slides");

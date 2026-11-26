@@ -11,27 +11,34 @@
 //   * no ActiveX controls (ppt/activeX/);
 //   * no embedded OLE binaries (*.bin under ppt/embeddings/, which can carry packaged programs).
 //     Embedded Office files (.xlsx charts) stay fine.
-// Entry names are read from the zip's central directory, which stores them uncompressed.
+// Entry names are stored uncompressed in every local file header and central directory header.
+// We read the name of EVERY such header anywhere in the file and never skip ahead by a header's own
+// lengths, so a crafted header can't jump over (and hide) an entry. A crafted file can only end up
+// refused, never let through (tau-security, 26.11).
 
 export const PPTX_MIME = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
 
 export type PptxCheck = { ok: true } | { ok: false; reason: "type" | "unsafe" };
 
-/** The entry names in a zip's central directory (empty when it isn't a zip). */
+/** Every entry name in a zip's headers, local and central, de-duplicated (empty when it isn't a zip). */
 export function zipEntryNames(bytes: Uint8Array): string[] {
-  const names: string[] = [];
+  const names = new Set<string>();
   const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  // Central directory file headers: signature PK\x01\x02, name length at +28, name at +46.
-  for (let i = 0; i + 46 <= bytes.length; i++) {
-    if (bytes[i] !== 0x50 || bytes[i + 1] !== 0x4b || bytes[i + 2] !== 0x01 || bytes[i + 3] !== 0x02) continue;
-    const len = dv.getUint16(i + 28, true);
-    const extra = dv.getUint16(i + 30, true);
-    const comment = dv.getUint16(i + 32, true);
-    if (i + 46 + len > bytes.length) break;
-    names.push(new TextDecoder().decode(bytes.subarray(i + 46, i + 46 + len)));
-    i += 45 + len + extra + comment;
+  const dec = new TextDecoder();
+  for (let i = 0; i + 4 <= bytes.length; i++) {
+    if (bytes[i] !== 0x50 || bytes[i + 1] !== 0x4b) continue;
+    // Local file header PK\x03\x04: name length at +26, name at +30.
+    // Central directory header PK\x01\x02: name length at +28, name at +46.
+    const local = bytes[i + 2] === 0x03 && bytes[i + 3] === 0x04;
+    const central = bytes[i + 2] === 0x01 && bytes[i + 3] === 0x02;
+    if (!local && !central) continue;
+    const [lenAt, nameAt] = local ? [26, 30] : [28, 46];
+    if (i + nameAt > bytes.length) continue;
+    const len = dv.getUint16(i + lenAt, true);
+    if (len === 0 || i + nameAt + len > bytes.length) continue;
+    names.add(dec.decode(bytes.subarray(i + nameAt, i + nameAt + len)));
   }
-  return names;
+  return [...names];
 }
 
 export function checkPptx(bytes: Uint8Array): PptxCheck {
