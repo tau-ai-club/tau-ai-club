@@ -159,6 +159,41 @@ export async function runContentChecks(db, check) {
   check(Boolean((await as("guest", "select category from public.event_files")).error), "guest: still no access to event_files");
   await db.query("update public.event_files set category = 'summary' where path = $1", [pdf]);
 
+  // ---- PowerPoint slides (20261126180000_event_file_pptx.sql) ---------------------
+  const deck = "cohort-02-opening/lecturer-deck.pptx";
+  const addDeck = (category) => as("admin", "insert into public.event_files (event_id, path, title_he, title_en, status, category) values ($1, $2, 'מצגת', 'Deck', 'draft', $3) returning kind, category", [opener, deck, category]);
+  check(Boolean((await addDeck("summary")).error), "a .pptx can't be a summary");
+  check(Boolean((await addDeck("resources")).error), "a .pptx can't be resources");
+  const okDeck = await addDeck("slides");
+  check(!okDeck.error && okDeck.rows?.[0]?.category === "slides" && okDeck.rows?.[0]?.kind === "pdf", "admin: can add a .pptx as the lecturer's slides (kind 'pdf': a download)");
+  check(Boolean((await as("admin", "update public.event_files set category = 'summary' where path = $1", [deck])).error), "a .pptx can't be changed away from slides");
+  for (const who of ["alice", "outsider"]) {
+    check(
+      denied(await as(who, "insert into public.event_files (event_id, path, title_he, title_en, status, category) values ($1, 'cohort-02-opening/evil.pptx', 'x', 'x', 'published', 'slides')", [opener])),
+      `${who}: cannot add a .pptx`,
+    );
+  }
+  for (const p of ["cohort-02-opening/x.ppt", "cohort-02-opening/x.pptm", "cohort-02-opening/x.docx", "cohort-02-opening/x.pptx.exe"]) {
+    const r = await as("admin", "insert into public.event_files (event_id, path, title_he, title_en, category) values ($1, $2, 'x', 'x', 'slides')", [opener, p]);
+    check(Boolean(r.error), `event_files.path refuses ${p}`);
+  }
+  check(Boolean((await as("admin", "update public.event_files set category = 'slides' where path = $1", [pdf])).error) === false, "a PDF can still be slides");
+  await db.query("update public.event_files set category = 'summary' where path = $1", [pdf]);
+  const deckBucket = (await db.query("select allowed_mime_types as m, file_size_limit as l from storage.buckets where id = 'event-files'")).rows[0];
+  check(
+    deckBucket.m.includes("application/vnd.openxmlformats-officedocument.presentationml.presentation") && !deckBucket.m.some((m) => /macro|ms-powerpoint|octet/i.test(m)),
+    "the bucket accepts .pptx (no macro-enabled or legacy PowerPoint types)",
+  );
+  check(Number(deckBucket.l) === 10485760, "the bucket's size limit is unchanged (10 MB)");
+  await db.query("insert into storage.objects (bucket_id, name) values ('event-files', $1)", [deck]);
+  const deckFor = (who) => as(who, "select name from storage.objects where bucket_id = 'event-files' and name = $1", [deck]);
+  check((await deckFor("alice")).rows?.length === 0, "member: a draft .pptx can't be read");
+  await db.query("update public.event_files set status = 'published' where path = $1", [deck]);
+  check((await deckFor("alice")).rows?.length === 1, "member: a published .pptx can be downloaded");
+  check(denied(await deckFor("guest")) || (await deckFor("guest")).rows?.length === 0, "guest: can't read a .pptx");
+  await db.query("delete from storage.objects where bucket_id = 'event-files' and name = $1", [deck]);
+  await db.query("delete from public.event_files where path = $1", [deck]);
+
   // ---- interactive HTML lessons (20261124000000_event_lessons.sql) ----------------
   const lesson = "cohort-02-opening/how-ai-agents-work.html";
   const addLesson = await as("admin", "insert into public.event_files (event_id, path, title_he, title_en, status) values ($1, $2, 'שיעור', 'Lesson', 'draft') returning kind", [opener, lesson]);

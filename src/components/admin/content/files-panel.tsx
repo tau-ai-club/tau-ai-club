@@ -7,7 +7,7 @@ import { ActionForm } from "@/components/admin/action-form";
 import { dangerBtn, hintClass, inputClass, labelClass, panelClass, panelTitle, smallBtn } from "@/components/admin/styles";
 import { FilePicker } from "@/components/admin/file-picker";
 import { deleteEventFile, setFileCategory, setFileStatus, uploadEventFile } from "@/app/[locale]/admin/content/actions";
-import { defaultMaterial, materialMismatch, materialOf, type EventFile, type MaterialKind } from "@/lib/content/sections";
+import { defaultMaterial, fileFormat, materialMismatch, materialOf, type EventFile, type FileFormat, type MaterialKind } from "@/lib/content/sections";
 import { MaterialIcon } from "./material-icon";
 import { MaterialPicker, useMaterialLabel } from "./material-picker";
 import { cn } from "@/lib/utils";
@@ -17,7 +17,7 @@ export function FilesPanel({ eventId, files }: { eventId: string; files: Require
   const t = useTranslations("content");
   const label = useMaterialLabel();
   // "סוג הקובץ" (26.11) shows once a file is chosen, preselected from it: HTML is a game, a PDF a summary.
-  const [picked, setPicked] = useState<"pdf" | "html" | null>(null);
+  const [picked, setPicked] = useState<FileFormat | null>(null);
   const [material, setMaterial] = useState<MaterialKind>("summary");
   // Whenever the form resets (React resets it after each upload attempt), the chosen file is gone, so
   // the choice goes too. "reset" doesn't bubble: listen while it passes down (capture).
@@ -49,12 +49,12 @@ export function FilesPanel({ eventId, files }: { eventId: string; files: Require
               const input = e.target as unknown as HTMLInputElement;
               if (input.name !== "file") return;
               const name = input.files?.[0]?.name ?? "";
-              setPicked(name ? (/\.html?$/i.test(name) ? "html" : "pdf") : null);
+              setPicked(name ? fileFormat(name) : null);
               setMaterial(defaultMaterial(name));
             }}
           >
             {t("fileChoose")}
-            <FilePicker name="file" accept="application/pdf,.pdf,text/html,.html,.htm" required />
+            <FilePicker name="file" accept="application/pdf,.pdf,text/html,.html,.htm,application/vnd.openxmlformats-officedocument.presentationml.presentation,.pptx" required />
           </label>
           {picked && <MaterialPicker value={material} onChange={setMaterial} file={picked} legend={t("fileCategory")} testId="file-category" />}
           <label className={labelClass}>
@@ -141,14 +141,14 @@ function FileKindChange({ file, eventId }: { file: Required<EventFile>; eventId:
         <MaterialPicker
           value={value}
           onChange={setValue}
-          file={file.kind === "lesson" ? "html" : "pdf"}
+          file={fileFormat(file.path)}
           legend={t("fileCategory")}
           testId="file-kind-picker"
         />
         <button
           type="submit"
           className={cn(smallBtn, "w-fit disabled:opacity-50")}
-          disabled={value === current || materialMismatch(value, file.kind === "lesson" ? "html" : "pdf") !== null}
+          disabled={value === current || materialMismatch(value, fileFormat(file.path)) !== null}
           data-testid="file-kind-save"
         >
           {t("fileKindSave")}

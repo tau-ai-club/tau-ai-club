@@ -4,8 +4,9 @@ import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { adminClient, getViewer } from "@/lib/auth/viewer";
 import { revalidatePublicContent, str } from "@/lib/admin/content";
-import { CONTENT_SECTIONS, isMaterialKind, materialMismatch, type ContentSection, type FileCategory } from "@/lib/content/sections";
+import { CONTENT_SECTIONS, defaultMaterial, fileFormat, isMaterialKind, materialMismatch, type ContentSection, type FileCategory, type FileFormat } from "@/lib/content/sections";
 import { readLessonUpload } from "@/lib/content/lesson";
+import { PPTX_MIME, checkPptx } from "@/lib/content/pptx";
 import type { ActionState } from "@/components/admin/action-form";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -69,9 +70,14 @@ export async function uploadEventFile(_: ActionState, fd: FormData): Promise<Act
   if (!UUID.test(eventId) || !(file instanceof File) || file.size === 0) return { ok: false, message: t("fileErrorType") };
   if (file.size > MAX_FILE) return { ok: false, message: t("fileErrorSize") };
   const bytes = new Uint8Array(await file.arrayBuffer());
-  let ext: "pdf" | "html";
+  let ext: FileFormat;
   let body: Uint8Array = bytes;
-  if (/\.pdf$/i.test(file.name)) {
+  if (/\.pptx$/i.test(file.name)) {
+    // The lecturer's slides as PowerPoint (26.11): a real presentation, without macros or embedded programs.
+    const deck = checkPptx(bytes);
+    if (!deck.ok) return { ok: false, message: t(deck.reason === "unsafe" ? "fileErrorPptxUnsafe" : "fileErrorType") };
+    ext = "pptx";
+  } else if (/\.pdf$/i.test(file.name)) {
     // A real PDF starts with "%PDF-", whatever the browser says the type is.
     if (String.fromCharCode(...bytes.slice(0, 5)) !== "%PDF-") return { ok: false, message: t("fileErrorType") };
     ext = "pdf";
@@ -83,7 +89,7 @@ export async function uploadEventFile(_: ActionState, fd: FormData): Promise<Act
   }
   // What the uploader says it is (26.11). No pick (an older form) means the file's default.
   const picked = str(fd, "material");
-  const material = isMaterialKind(picked) ? picked : ext === "html" ? "game" : "summary";
+  const material = isMaterialKind(picked) ? picked : defaultMaterial(`x.${ext}`);
   const mismatch = materialMismatch(material, ext);
   if (mismatch) return { ok: false, message: t(mismatch) };
 
@@ -91,14 +97,14 @@ export async function uploadEventFile(_: ActionState, fd: FormData): Promise<Act
   if (!event) return { ok: false, message: t("errorFailed") };
   const base =
     file.name
-      .replace(/\.(pdf|html?)$/i, "")
+      .replace(/\.(pdf|html?|pptx)$/i, "")
       .normalize("NFKD")
       .replace(/[^A-Za-z0-9._-]+/g, "-")
       .replace(/^[-._]+|[-._]+$/g, "")
       .slice(0, 80) || (ext === "html" ? "lesson" : "file");
   const path = `${event.slug}/${base}.${ext}`;
 
-  const contentType = ext === "pdf" ? "application/pdf" : "text/plain";
+  const contentType = ext === "pdf" ? "application/pdf" : ext === "pptx" ? PPTX_MIME : "text/plain";
   const up = await supabase.storage.from("event-files").upload(path, body, { contentType, upsert: true });
   if (up.error) {
     console.error("[content] upload failed", up.error.message);
@@ -143,9 +149,9 @@ export async function setFileCategory(_: ActionState, fd: FormData): Promise<Act
   const eventId = str(fd, "event_id");
   const material = str(fd, "material");
   if (!UUID.test(id) || !UUID.test(eventId) || !isMaterialKind(material)) return { ok: false, message: t("errorFailed") };
-  const { data: row } = await supabase.from("event_files").select("kind").eq("id", id).maybeSingle();
+  const { data: row } = await supabase.from("event_files").select("path").eq("id", id).maybeSingle();
   if (!row) return { ok: false, message: t("errorFailed") };
-  const mismatch = materialMismatch(material, row.kind === "lesson" ? "html" : "pdf");
+  const mismatch = materialMismatch(material, fileFormat(row.path));
   if (mismatch) return { ok: false, message: t(mismatch) };
   if (material === "game") return { ok: true, message: t("saved") }; // already a game: nothing to store
   const { error } = await supabase.from("event_files").update({ category: material }).eq("id", id).eq("kind", "pdf");
