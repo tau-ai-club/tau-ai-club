@@ -82,7 +82,7 @@ test.describe("event material kinds", () => {
     expect(p).toMatch(/setMaterial\(defaultMaterial\(name\)\)/);
     expect(p).toMatch(/\{picked && <MaterialPicker /);
     // The button waits for a pick that fits (the picker says why); the form reset clears the choice.
-    expect(p).toMatch(/disabled=\{uploadMismatch !== null\}/);
+    expect(p).toMatch(/disabled=\{uploadMismatch !== null \|\| direct\?\.busy === true\}/);
     expect(p).toMatch(/addEventListener\("reset", clear, true\)/);
     expect(p).toMatch(/<ActionForm action=\{setFileCategory\}[\s\S]*?<MaterialPicker/);
     // The tiles' own icons and tab names (tau-designer, file-tiles.tsx), not a second set.

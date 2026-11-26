@@ -104,10 +104,10 @@ test.describe("PowerPoint slides", () => {
 
   test("upload: checked before it's stored, saved with the pptx type; the editor accepts .pptx", () => {
     const a = src("src/app/[locale]/admin/content/actions.ts");
-    const check = a.indexOf("checkPptx(bytes)");
+    const check = a.indexOf('checkFileBytes("pptx", bytes)');
     expect(check).toBeGreaterThan(0);
     expect(check).toBeLessThan(a.indexOf('storage.from("event-files").upload'));
-    expect(a).toMatch(/ext === "pptx" \? PPTX_MIME/);
+    expect(src("src/lib/content/upload.ts")).toMatch(/ext === "pptx" \? PPTX_MIME/);
     expect(PPTX_MIME).toBe("application/vnd.openxmlformats-officedocument.presentationml.presentation");
     expect(src("src/components/admin/content/files-panel.tsx")).toMatch(/accept="[^"]*\.pptx"/);
     // Members download it through the same members-only signed URL, as an attachment.

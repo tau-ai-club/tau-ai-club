@@ -184,7 +184,7 @@ export async function runContentChecks(db, check) {
     deckBucket.m.includes("application/vnd.openxmlformats-officedocument.presentationml.presentation") && !deckBucket.m.some((m) => /macro|ms-powerpoint|octet/i.test(m)),
     "the bucket accepts .pptx (no macro-enabled or legacy PowerPoint types)",
   );
-  check(Number(deckBucket.l) === 10485760, "the bucket's size limit is unchanged (10 MB)");
+  check(Number(deckBucket.l) === 26214400, "the bucket's size limit is 25 MB (20261126190000)");
   await db.query("insert into storage.objects (bucket_id, name) values ('event-files', $1)", [deck]);
   const deckFor = (who) => as(who, "select name from storage.objects where bucket_id = 'event-files' and name = $1", [deck]);
   check((await deckFor("alice")).rows?.length === 0, "member: a draft .pptx can't be read");
@@ -192,6 +192,19 @@ export async function runContentChecks(db, check) {
   check((await deckFor("alice")).rows?.length === 1, "member: a published .pptx can be downloaded");
   check(denied(await deckFor("guest")) || (await deckFor("guest")).rows?.length === 0, "guest: can't read a .pptx");
   await db.query("delete from storage.objects where bucket_id = 'event-files' and name = $1", [deck]);
+  // Staged direct uploads (20261126190000): no row points at them, so nobody but admins sees them.
+  const staged = "_incoming/00000000-0000-4000-8000-0000000000aa.pptx";
+  await db.query("insert into storage.objects (bucket_id, name) values ('event-files', $1)", [staged]);
+  for (const who of ["alice", "outsider"]) {
+    const r = await as(who, "select name from storage.objects where bucket_id = 'event-files' and name = $1", [staged]);
+    check(Boolean(r.error) || r.rows?.length === 0, `${who}: can't read a staged upload`);
+    check(denied(await as(who, "insert into storage.objects (bucket_id, name) values ('event-files', '_incoming/00000000-0000-4000-8000-0000000000bb.pdf')")), `${who}: can't stage an upload`);
+  }
+  const gs = await as("guest", "select name from storage.objects where bucket_id = 'event-files' and name = $1", [staged]);
+  check(Boolean(gs.error) || gs.rows?.length === 0, "guest: can't read a staged upload");
+  check((await as("admin", "select name from storage.objects where bucket_id = 'event-files' and name = $1", [staged])).rows?.length === 1, "admin: can read a staged upload (to check it)");
+  check(Boolean((await as("admin", "insert into public.event_files (event_id, path, title_he, title_en, category) values ($1, $2, 'x', 'x', 'slides')", [opener, staged])).error), "a staged path can never become a members' row (event_files.path check)");
+  await db.query("delete from storage.objects where bucket_id = 'event-files' and name = $1", [staged]);
   await db.query("delete from public.event_files where path = $1", [deck]);
 
   // ---- interactive HTML lessons (20261124000000_event_lessons.sql) ----------------

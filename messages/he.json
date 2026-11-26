@@ -697,7 +697,7 @@
     "previewEmpty": "עוד אין מה להציג.",
     "notSaved": "עוד לא נוצר: השמירה יוצרת אותו.",
     "filesTitle": "קבצים (לחברי המועדון)",
-    "filesBody": "סיכומי PDF ומצגות שחברי המועדון מורידים, ושיעורים אינטראקטיביים (HTML) שנפתחים ישר באתר. עד 3MB לקובץ.",
+    "filesBody": "סיכומי PDF ומצגות שחברי המועדון מורידים (עד 25MB), ושיעורים אינטראקטיביים (HTML, עד 3MB) שנפתחים ישר באתר.",
     "fileTitleHe": "כותרת (עברית)",
     "fileTitleEn": "כותרת (אנגלית)",
     "fileTitle": "כותרת",
@@ -709,7 +709,7 @@
     "fileUpload": "העלאה",
     "fileUploaded": "הקובץ הועלה.",
     "fileErrorType": "רק קובץ PDF, מצגת PowerPoint (‎.pptx) או שיעור HTML (‎.html).",
-    "fileErrorSize": "הקובץ גדול מ-3MB.",
+    "fileErrorSize": "שיעור HTML יכול להיות עד 3MB.",
     "fileDelete": "מחיקה",
     "fileDeleteConfirm": "למחוק את הקובץ? חברי המועדון לא יוכלו להוריד אותו יותר.",
     "filePublish": "הצגה",
@@ -743,7 +743,10 @@
     "fileKindMismatchPdf": "סיכום, מצגת המרצה וחומר עזר הם קובצי PDF. לקובץ HTML בחרו משחק.",
     "fileKindChange": "שינוי סוג הקובץ",
     "fileKindMismatchPptx": "קובץ PowerPoint עולה רק כמצגת המרצה.",
-    "fileErrorPptxUnsafe": "המצגת מכילה מאקרו או תוכנה מוטמעת. שמרו אותה מחדש כ‎.pptx רגיל או כ‎PDF."
+    "fileErrorPptxUnsafe": "המצגת מכילה מאקרו או תוכנה מוטמעת. שמרו אותה מחדש כ‎.pptx רגיל או כ‎PDF.",
+    "fileErrorSizeDirect": "הקובץ גדול מ-25MB. אפשר לשמור את המצגת מחדש עם תמונות דחוסות, או כ-PDF.",
+    "fileErrorUpload": "ההעלאה נקטעה. בדקו את החיבור ונסו שוב.",
+    "fileUploading": "מעלה את הקובץ…"
   },
   "comingSoon": {
     "eyebrow": "אזור החברים",
