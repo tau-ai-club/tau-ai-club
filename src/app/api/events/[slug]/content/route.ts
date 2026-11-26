@@ -51,7 +51,7 @@ export async function GET(request: NextRequest, ctx: RouteContext<"/api/events/[
       .eq("event_id", event.id)
       .eq("status", "published")
       .eq("visibility", "members"),
-    supabase.from("event_files").select("id, title_he, title_en, kind").eq("event_id", event.id).eq("status", "published"),
+    supabase.from("event_files").select("id, title_he, title_en, kind, category").eq("event_id", event.id).eq("status", "published"),
   ]);
   return respond(
     {

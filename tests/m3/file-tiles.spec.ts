@@ -1,41 +1,55 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import en from "../../messages/en.json";
 import he from "../../messages/he.json";
-import { FileTiles, type FileKey } from "../../src/components/content/file-tiles";
+import { FileTiles, type FileKey, type TileFile } from "../../src/components/content/file-tiles";
 
-// The member files as tiles with a tab (DECISIONS 25.11, files-look option A). Lecture and workshop
-// pages need a signed-in member, which this suite has no Supabase for, so the tiles are rendered
-// on their own and placed into a real page of the production build: its real CSS and fonts, at
-// phone and desktop width, with the page's scripts blocked. The real pages pass the locale-aware
-// Link (file-link.tsx).
+// The member files as tiles with a tab (DECISIONS 25.11, files-look option A; four kinds, DECISIONS
+// 26.11). Lecture and workshop pages need a signed-in member, which this suite has no Supabase for,
+// so the tiles are rendered on their own and placed into a real page of the production build: its
+// real CSS and fonts, at phone and desktop width, with the page's scripts blocked. The real pages
+// pass the locale-aware Link (file-link.tsx).
 
-const FILES = [
-  { id: "11111111-1111-4111-8111-111111111111", title_he: "סיכום הרצאה", title_en: "Talk summary", kind: "pdf" as const },
-  { id: "22222222-2222-4222-8222-222222222222", title_he: "בוחן אינטראקטיבי", title_en: "Interactive quiz", kind: "lesson" as const },
+const FILES: TileFile[] = [
+  { id: "11111111-1111-4111-8111-111111111111", title_he: "סיכום הרצאה", title_en: "Talk summary", kind: "pdf" },
+  { id: "22222222-2222-4222-8222-222222222222", title_he: "בוחן אינטראקטיבי", title_en: "Interactive quiz", kind: "lesson" },
 ];
 
-function markup(locale: "he" | "en") {
+// All four kinds, in upload order that isn't the page order. The summary has no category (Ido's
+// uploads and older rows), and the game says "slides" by mistake: HTML is always a game.
+const KINDS: TileFile[] = [
+  { id: "44444444-4444-4444-8444-444444444444", title_he: "רשימת קריאה וכלים", title_en: "Reading list and tools", kind: "pdf", category: "resources" },
+  { id: "33333333-3333-4333-8333-333333333333", title_he: "המצגת של המרצה", title_en: "The lecturer's slides", kind: "pdf", category: "slides" },
+  { id: "22222222-2222-4222-8222-222222222222", title_he: "בוחן אינטראקטיבי", title_en: "Interactive quiz", kind: "lesson", category: "slides" },
+  { id: "11111111-1111-4111-8111-111111111111", title_he: "סיכום הרצאה", title_en: "Talk summary", kind: "pdf" },
+];
+
+function markup(locale: "he" | "en", files: TileFile[]) {
   const m = (locale === "he" ? he : en).content as Record<string, string>;
   const t = (k: FileKey, v?: { title: string }) => m[k].replace("{title}", v?.title ?? "");
   // A plain <a> stands in for the locale-aware Link (that one needs Next's router).
-  return renderToStaticMarkup(createElement(FileTiles, { files: FILES, locale, t, LessonLink: "a" }));
+  return renderToStaticMarkup(createElement(FileTiles, { files, locale, t, LessonLink: "a" }));
 }
+
+async function place(page: Page, locale: "he" | "en", files: TileFile[]) {
+  // No scripts: React never hydrates, so nothing can redraw <main> over the injected tiles (that
+  // race made this spec flaky). The server HTML still brings the real CSS and fonts.
+  await page.route("**/*", (r) => (r.request().resourceType() === "script" ? r.abort() : r.continue()));
+  await page.goto(locale === "he" ? "/" : "/en");
+  await expect(page.locator("main")).toBeAttached();
+  await page.evaluate((html) => {
+    const main = document.querySelector("main")!;
+    main.innerHTML = `<section style="padding:2rem 1rem;max-width:52rem;margin:auto">${html}</section>`;
+  }, markup(locale, files));
+  return page.getByTestId("file-tiles");
+}
+
+const noSidewaysScroll = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
 
 for (const locale of ["he", "en"] as const) {
   test(`${locale}: a summary to download and a game to play, each a single link with a tab`, async ({ page }) => {
-    // No scripts: React never hydrates, so nothing can redraw <main> over the injected tiles (that
-    // race made this spec flaky). The server HTML still brings the real CSS and fonts.
-    await page.route("**/*", (r) => (r.request().resourceType() === "script" ? r.abort() : r.continue()));
-    await page.goto(locale === "he" ? "/" : "/en");
-    await expect(page.locator("main")).toBeAttached();
-    await page.evaluate((html) => {
-      const main = document.querySelector("main")!;
-      main.innerHTML = `<section style="padding:2rem 1rem;max-width:52rem;margin:auto">${html}</section>`;
-    }, markup(locale));
-
-    const tiles = page.getByTestId("file-tiles");
+    const tiles = await place(page, locale, FILES);
     const pdf = tiles.getByTestId("file-download");
     const lesson = tiles.getByTestId("lesson-open");
 
@@ -63,6 +77,55 @@ for (const locale of ["he", "en"] as const) {
     expect(await bg(lesson)).not.toBe(await bg(pdf));
 
     // No sideways scroll, phone or desktop.
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    expect(await noSidewaysScroll(page)).toBe(true);
+  });
+
+  test(`${locale}: four kinds in a fixed order, each told apart by its tab, icon and name`, async ({ page }, info) => {
+    const tiles = await place(page, locale, KINDS);
+    const items = tiles.locator(":scope > li");
+
+    // Summary, game, slides, resources, whatever order they were uploaded in. A missing category
+    // reads as a summary; an HTML file is a game even if its category says otherwise.
+    await expect(items).toHaveCount(4);
+    expect(await items.evaluateAll((els) => els.map((e) => e.getAttribute("data-kind")))).toEqual(["summary", "lesson", "slides", "resources"]);
+
+    const he_ = locale === "he";
+    const want = [
+      { href: `/api/files/${KINDS[3].id}`, tab: he_ ? "סיכום" : "Summary", name: he_ ? "הורדת סיכום הרצאה" : "Download Talk summary" },
+      { href: `/lessons/${KINDS[2].id}`, tab: he_ ? "משחק" : "Play", name: he_ ? "שיעור אינטראקטיבי: בוחן אינטראקטיבי" : "Interactive lesson: Interactive quiz" },
+      { href: `/api/files/${KINDS[1].id}`, tab: he_ ? "מצגת המרצה" : "Slides", name: he_ ? "הורדת המצגת: המצגת של המרצה" : "Download slides: The lecturer's slides" },
+      { href: `/api/files/${KINDS[0].id}`, tab: he_ ? "חומר עזר" : "Resources", name: he_ ? "הורדת חומר עזר: רשימת קריאה וכלים" : "Download resource: Reading list and tools" },
+    ];
+    const icons: string[] = [];
+    for (const [i, w] of want.entries()) {
+      const link = items.nth(i).getByRole("link");
+      await expect(link).toHaveAttribute("href", w.href);
+      await expect(link).toHaveAccessibleName(w.name);
+      await expect(link.locator("span").first()).toHaveText(w.tab); // the tab
+      icons.push(await link.locator("svg").first().innerHTML());
+    }
+    // Four different icons.
+    expect(new Set(icons).size).toBe(4);
+
+    // Only the game is purple: the three PDF buttons are the same outline, the game's is solid.
+    const bg = (i: number) => items.nth(i).locator("a > span").last().evaluate((e) => getComputedStyle(e).backgroundColor);
+    const [s, g, sl, r] = [await bg(0), await bg(1), await bg(2), await bg(3)];
+    expect(g).not.toBe(s);
+    expect(sl).toBe(s);
+    expect(r).toBe(s);
+
+    // 2×2 on desktop, stacked on the phone; no sideways scroll either way.
+    const boxes = await items.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON() as DOMRect));
+    if (info.project.name === "mobile") {
+      for (let i = 1; i < 4; i++) expect(boxes[i].top).toBeGreaterThan(boxes[i - 1].bottom);
+    } else {
+      expect(Math.abs(boxes[0].top - boxes[1].top)).toBeLessThan(2);
+      expect(Math.abs(boxes[2].top - boxes[3].top)).toBeLessThan(2);
+      expect(boxes[2].top).toBeGreaterThan(boxes[0].bottom);
+      // Hebrew reads right to left: the first tile of a row sits on the right.
+      if (he_) expect(boxes[0].left).toBeGreaterThan(boxes[1].left);
+      else expect(boxes[0].left).toBeLessThan(boxes[1].left);
+    }
+    expect(await noSidewaysScroll(page)).toBe(true);
   });
 }
