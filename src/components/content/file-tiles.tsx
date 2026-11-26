@@ -4,9 +4,15 @@ import { cn } from "@/lib/utils";
 
 /**
  * The member files on a lecture or workshop page, as tiles with a tab (DECISIONS 25.11, option A
- * in files-look): a PDF summary reads as something to download, an interactive lesson as something
- * to open and play. A PDF downloads through /api/files (a short-lived signed URL); a lesson opens
- * on the site, at /lessons/<id> (a sandboxed frame).
+ * in files-look; four kinds, DECISIONS 26.11).
+ *
+ * - An interactive lesson (HTML) is the game: the one purple tile, something to open and play, at
+ *   /lessons/<id> (a sandboxed frame).
+ * - A PDF is one of three calm kinds by its `category`: Ido's summary, the lecturer's slides, or
+ *   supporting material. A missing category means summary, so older rows and Ido's uploads stay
+ *   summaries. Tab, icon and line tell them apart. A PDF downloads through /api/files (a
+ *   short-lived signed URL).
+ * - The order is fixed: summary, game, slides, resources, keeping upload order within a kind.
  *
  * The whole tile is one link. Its accessible name is the full sentence ("הורדת …" / "שיעור
  * אינטראקטיבי: …"), so a screen reader hears one clear action, not the tab, title and button apart.
@@ -14,22 +20,62 @@ import { cn } from "@/lib/utils";
  * (file-link.tsx gives it the locale-aware Link), so this file has no Next imports and tests can
  * render it on its own.
  */
-export type FileKey = "download" | "openLesson" | "fileTabPdf" | "fileTabLesson" | "fileMetaPdf" | "fileMetaLesson" | "fileCtaPdf" | "fileCtaLesson";
+export type FileKey =
+  | "download" | "downloadSlides" | "downloadResources" | "openLesson"
+  | "fileTabPdf" | "fileTabLesson" | "fileTabSlides" | "fileTabResources"
+  | "fileMetaPdf" | "fileMetaLesson" | "fileMetaSlides" | "fileMetaResources"
+  | "fileCtaPdf" | "fileCtaLesson";
 export type T = (key: FileKey, values?: { title: string }) => string;
 export type LinkLike = "a" | ComponentType<{ href: string; className?: string; "aria-label"?: string; "data-testid"?: string; children?: ReactNode }>;
 
+/** What a PDF is. The data passes it in; HTML is always a game, whatever it says. */
+export type FileCategory = "summary" | "slides" | "resources";
+/** A file as the tiles read it: the shared EventFile, plus its category once the data carries it. */
+export type TileFile = EventFile & { category?: string | null };
+export type TileKind = "summary" | "lesson" | "slides" | "resources";
+
+const ORDER: readonly TileKind[] = ["summary", "lesson", "slides", "resources"];
+
+export function kindOf(f: TileFile): TileKind {
+  if (f.kind === "lesson") return "lesson";
+  return f.category === "slides" || f.category === "resources" ? f.category : "summary";
+}
+
+/** Summary, game, slides, resources; the order they came in within each kind. */
+export function orderFiles<F extends TileFile>(files: readonly F[]): F[] {
+  return files
+    .map((f, i) => ({ f, i }))
+    .sort((a, b) => ORDER.indexOf(kindOf(a.f)) - ORDER.indexOf(kindOf(b.f)) || a.i - b.i)
+    .map((x) => x.f);
+}
+
+const COPY: Record<TileKind, { tab: FileKey; meta: FileKey; cta: FileKey; name: FileKey }> = {
+  summary: { tab: "fileTabPdf", meta: "fileMetaPdf", cta: "fileCtaPdf", name: "download" },
+  lesson: { tab: "fileTabLesson", meta: "fileMetaLesson", cta: "fileCtaLesson", name: "openLesson" },
+  slides: { tab: "fileTabSlides", meta: "fileMetaSlides", cta: "fileCtaPdf", name: "downloadSlides" },
+  resources: { tab: "fileTabResources", meta: "fileMetaResources", cta: "fileCtaPdf", name: "downloadResources" },
+};
+
 // Pixel glyphs on the logo's grid, like the home page's card icons: "#" lit (brand purple), "+" dim.
-const GLYPHS = {
+const GLYPHS: Record<TileKind, readonly string[]> = {
   // A page with lines of text: the summary.
-  pdf: [".######..", ".#....##.", ".#.....#.", ".#+++++#.", ".#.....#.", ".#++++.#.", ".#.....#.", ".#+++..#.", ".#######."],
+  summary: [".######..", ".#....##.", ".#.....#.", ".#+++++#.", ".#.....#.", ".#++++.#.", ".#.....#.", ".#+++..#.", ".#######."],
   // A screen with a play sign: the interactive lesson.
   lesson: ["+++++++++", "+.......+", "+..#....+", "+..##...+", "+..###..+", "+..##...+", "+..#....+", "+.......+", "+++++++++"],
-} as const;
+  // A projector screen on a stand, with a rising bar chart: the lecturer's slides.
+  slides: ["#########", ".+++++++.", ".+....#+.", ".+..#.#+.", ".+#.#.#+.", ".+++++++.", "....#....", "...#.#...", "..#...#.."],
+  // A toolbox: supporting material.
+  resources: [".........", "...###...", "...#.#...", "#########", "#+++++++#", "####+####", "#+++++++#", "#+++++++#", "#########"],
+};
 
-function Glyph({ kind }: { kind: keyof typeof GLYPHS }) {
+/**
+ * One kind's pixel icon, for reuse (e.g. the kind picker in the files editor). Decorative
+ * (aria-hidden): put the kind's name in words next to it. Size it with className (default 44px).
+ */
+export function FileKindIcon({ kind, className }: { kind: TileKind; className?: string }) {
   const rows = GLYPHS[kind];
   return (
-    <svg aria-hidden viewBox={`0 0 ${rows[0].length} ${rows.length}`} shapeRendering="crispEdges" className="block size-11 shrink-0">
+    <svg aria-hidden viewBox={`0 0 ${rows[0].length} ${rows.length}`} shapeRendering="crispEdges" className={cn("block size-11 shrink-0", className)}>
       {rows.flatMap((row, y) =>
         [...row].map((c, x) =>
           c === "." ? null : (
@@ -40,12 +86,16 @@ function Glyph({ kind }: { kind: keyof typeof GLYPHS }) {
     </svg>
   );
 }
+export const SummaryIcon = ({ className }: { className?: string }) => <FileKindIcon kind="summary" className={className} />;
+export const GameIcon = ({ className }: { className?: string }) => <FileKindIcon kind="lesson" className={className} />;
+export const SlidesIcon = ({ className }: { className?: string }) => <FileKindIcon kind="slides" className={className} />;
+export const ResourcesIcon = ({ className }: { className?: string }) => <FileKindIcon kind="resources" className={className} />;
 
-export function FileTiles({ files, locale, t, LessonLink }: { files: EventFile[]; locale: string; t: T; LessonLink: LinkLike }) {
+export function FileTiles({ files, locale, t, LessonLink }: { files: readonly TileFile[]; locale: string; t: T; LessonLink: LinkLike }) {
   return (
     <ul className="mt-10 grid gap-x-4 gap-y-10 sm:grid-cols-2" data-testid="file-tiles">
-      {files.map((f) => (
-        <li key={f.id} className="min-w-0">
+      {orderFiles(files).map((f) => (
+        <li key={f.id} className="min-w-0" data-kind={kindOf(f)}>
           <FileTile file={f} title={locale === "en" ? f.title_en : f.title_he} locale={locale} t={t} LessonLink={LessonLink} />
         </li>
       ))}
@@ -53,8 +103,10 @@ export function FileTiles({ files, locale, t, LessonLink }: { files: EventFile[]
   );
 }
 
-function FileTile({ file, title, locale, t, LessonLink }: { file: EventFile; title: string; locale: string; t: T; LessonLink: LinkLike }) {
-  const lesson = file.kind === "lesson";
+function FileTile({ file, title, locale, t, LessonLink }: { file: TileFile; title: string; locale: string; t: T; LessonLink: LinkLike }) {
+  const kind = kindOf(file);
+  const copy = COPY[kind];
+  const lesson = kind === "lesson";
   const en = locale === "en";
   const body = (
     <>
@@ -63,19 +115,19 @@ function FileTile({ file, title, locale, t, LessonLink }: { file: EventFile; tit
       <span
         aria-hidden
         className={cn(
-          "absolute top-px -start-px inline-flex -translate-y-full items-center gap-1.5 rounded-t-md border border-b-0 px-3 pt-1 pb-0.5 leading-[1.4]",
+          "absolute top-px -start-px inline-flex -translate-y-full items-center gap-1.5 rounded-t-md border border-b-0 px-3 pt-1 pb-0.5 leading-[1.4] whitespace-nowrap",
           en ? "font-pixel text-[0.625rem] tracking-[0.16em] uppercase" : "text-[0.8125rem] font-medium",
           lesson ? "border-brand-purple bg-brand-purple text-fg" : "border-border-strong bg-bg-raised text-fg-muted",
         )}
       >
         <span className="size-1.5 bg-current" />
-        {t(lesson ? "fileTabLesson" : "fileTabPdf")}
+        {t(copy.tab)}
       </span>
       <span className="flex min-w-0 items-center gap-4">
-        <Glyph kind={lesson ? "lesson" : "pdf"} />
+        <FileKindIcon kind={kind} />
         <span className="grid min-w-0 gap-1">
           <span className="text-[1.1875rem] leading-tight font-semibold break-words text-fg">{title}</span>
-          <span className={cn("text-sm", lesson ? "text-brand-purple-soft" : "text-fg-subtle")}>{t(lesson ? "fileMetaLesson" : "fileMetaPdf")}</span>
+          <span className={cn("text-sm", lesson ? "text-brand-purple-soft" : "text-fg-subtle")}>{t(copy.meta)}</span>
         </span>
       </span>
       <span
@@ -96,7 +148,7 @@ function FileTile({ file, title, locale, t, LessonLink }: { file: EventFile; tit
             <path d="M7 2h2v8h2v2H9v2H7v-2H5v-2h2z" />
           </svg>
         )}
-        {t(lesson ? "fileCtaLesson" : "fileCtaPdf")}
+        {t(copy.cta)}
       </span>
     </>
   );
@@ -108,16 +160,15 @@ function FileTile({ file, title, locale, t, LessonLink }: { file: EventFile; tit
       ? "border-brand-purple bg-[linear-gradient(160deg,color-mix(in_oklab,var(--brand-purple)_22%,var(--bg-raised)),var(--bg-raised)_70%)]"
       : "border-border-strong bg-bg-raised hover:border-brand-purple/60",
   );
+  const name = t(copy.name, { title });
 
   if (lesson) {
-    const name = t("openLesson", { title });
     return (
       <LessonLink href={`/lessons/${file.id}`} aria-label={name} className={tile} data-testid="lesson-open">
         {body}
       </LessonLink>
     );
   }
-  const name = t("download", { title });
   return (
     <a href={`/api/files/${file.id}`} aria-label={name} className={tile} data-testid="file-download">
       {body}
