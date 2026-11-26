@@ -28,25 +28,29 @@ test("exactly one film canvas on every page: tall on home, a band elsewhere", as
   }
 });
 
-test("a pause button on every page; pausing holds across pages (one setting for the site)", async ({ page }) => {
+test("no pause button on any page (26.11), and an old remembered pause no longer stops the film", async ({ page }) => {
+  // Someone who paused with the old button: the film must run anyway, and the old setting goes.
+  await page.addInitScript(() => {
+    if (!sessionStorage.getItem("seeded")) {
+      localStorage.setItem("tau-film-paused", "1");
+      sessionStorage.setItem("seeded", "1");
+    }
+  });
+  for (const p of ["/", "/en", ...PAGES]) {
+    await page.goto(p);
+    await expect(page.getByTestId("site-film"), p).toHaveCount(1);
+    await expect(page.getByRole("button", { name: /עצירת הרקע|הפעלת הרקע|Pause background|Play background/ }), p).toHaveCount(0);
+    await expect(page.locator('[data-testid="film-toggle"]'), p).toHaveCount(0);
+  }
   await page.goto("/learn");
-  const toggle = page.locator('[data-testid="film-toggle"]:visible');
-  await expect(toggle).toHaveCount(1);
-  await expect(toggle).toHaveText("עצירת הרקע");
+  await expect(page.getByTestId("site-film")).toHaveAttribute("data-shown", "true");
+  expect(await page.evaluate(() => localStorage.getItem("tau-film-paused"))).toBeNull();
   const frame = async () => (await page.locator("canvas").screenshot()).toString("base64");
-  await toggle.click();
-  await expect(toggle).toHaveText("הפעלת הרקע");
-  await page.goto("/login");
-  await expect(page.locator('[data-testid="film-toggle"]:visible')).toHaveText("הפעלת הרקע");
   const a = await frame();
-  await page.waitForTimeout(600);
-  expect(await frame()).toBe(a); // paused: the frame doesn't change
-  await page.goto("/en");
-  await expect(page.locator('[data-testid="film-toggle"]:visible')).toHaveText("Play background");
-  await page.locator('[data-testid="film-toggle"]:visible').click(); // back to playing for later tests
+  await expect.poll(frame, { timeout: 3000 }).not.toBe(a); // moving
 });
 
-test("reduced motion: no film and no button on any page", async ({ browser }) => {
+test("reduced motion: no film on any page", async ({ browser }) => {
   const ctx = await browser.newContext({ reducedMotion: "reduce" });
   const page = await ctx.newPage();
   for (const p of ["/", ...PAGES]) {
@@ -76,6 +80,9 @@ test("source: one film, in the layout; HeroFilm keeps its guards", () => {
   expect(film).toMatch(/saveData === true/);
   expect(film).toMatch(/new IntersectionObserver/);
   expect(film).toMatch(/visibilitychange/);
-  expect(film).toMatch(/localStorage\.getItem\(KEY\)/);
-  expect(code("src/app/[locale]/admin/layout.tsx")).toMatch(/<FilmToggleInline \/>/);
+  // No pause button anywhere (26.11), and the old remembered pause is cleared, never read.
+  expect(film).toMatch(/localStorage\.removeItem\(OLD_PAUSE_KEY\)/);
+  expect(film).not.toMatch(/localStorage\.getItem/);
+  for (const f of ["src/app/[locale]/layout.tsx", "src/app/[locale]/page.tsx", "src/app/[locale]/admin/layout.tsx", "src/components/site/site-film.tsx", "src/components/home/hero-film.tsx"])
+    expect(code(f), f).not.toMatch(/FilmToggle|filmPause|filmPlay/);
 });
