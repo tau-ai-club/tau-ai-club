@@ -55,11 +55,14 @@ export function MemberNextEvent({ children, pending }: { children?: ReactNode; p
   // `children`. So a member sees the card's frame from the first paint, and the card lands in it
   // without moving anything. The card has no entrance animation. Guests never see `pending`.
   if (card) return <div className="grid min-h-[37rem] lg:min-h-[38.75rem]">{card}</div>;
-  if (settled || !pending) return children;
+  if (!pending) return children;
+  // Settled with no card: the same tree as while waiting, minus `pending`. Returning `children`
+  // bare here would remount them, and a keyboard user who had already tabbed into them (e.g. the
+  // hero's "meet the speakers" link) would lose focus to <body>.
   return (
     <>
-      {children && <div className="contents [[data-member-hint]_&]:hidden">{children}</div>}
-      <div className="hidden [[data-member-hint]_&]:grid">{pending}</div>
+      {children && <div className={settled ? "contents" : "contents [[data-member-hint]_&]:hidden"}>{children}</div>}
+      {!settled && <div className="hidden [[data-member-hint]_&]:grid">{pending}</div>}
     </>
   );
 }
