@@ -11,7 +11,7 @@ import { NavProgress } from "@/components/site/nav-progress";
 import { Suspense } from "react";
 import { SiteFooter } from "@/components/site/site-footer";
 import { PageBackdrop } from "@/components/site/page-backdrop";
-import { SiteFilm, SiteFilmToggle } from "@/components/site/site-film";
+import { SiteFilm } from "@/components/site/site-film";
 import { PixelTrail } from "@/components/motion/pixel-trail";
 import "../globals.css";
 
@@ -140,7 +140,6 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             <SiteFilm />
             <SiteHeader />
             <main id="main" className="flex-1">
-              <SiteFilmToggle />
               {children}
             </main>
           </div>

@@ -10,22 +10,22 @@ import { useEffect, useRef, useState } from "react";
  * - Starts after hydration and fades in; before that (and with JS off) the static backdrop shows,
  *   so it never delays the first paint or LCP (a canvas is never an LCP candidate).
  * - Reduced motion or Save-Data: not rendered at all; the static backdrop stays.
- * - Pauses when it's off screen or the tab is hidden; <HeroFilmToggle> pauses it for good
- *   (remembered in this browser), as WCAG 2.2.2 asks of anything that moves for over 5 s.
+ * - Pauses when it's off screen or the tab is hidden. No pause button (user, 26.11): the motion is
+ *   decorative and sits behind the header and the hero only; reduced motion turns it off. The old
+ *   button's remembered pause (localStorage "tau-film-paused") is cleared, so nobody stays stuck on
+ *   a still film with no way to start it.
  * - Colours come from the tokens at runtime. The Next event card above it never moves.
  */
 
-const EVENT = "tau-film";
-const KEY = "tau-film-paused";
+/** The setting the old pause button left behind (removed 26.11): cleared, never read. */
+const OLD_PAUSE_KEY = "tau-film-paused";
 const LOOP = 8; // seconds
 const STILL = 2.4; // the frame shown when the film doesn't run
 
-function readPaused() {
+function clearOldPause() {
   try {
-    return localStorage.getItem(KEY) === "1";
-  } catch {
-    return false;
-  }
+    localStorage.removeItem(OLD_PAUSE_KEY);
+  } catch {}
 }
 
 type Colors = { p: string; s: string; g: string; b: string };
@@ -117,8 +117,8 @@ function draw(cv: HTMLCanvasElement, c: Colors, t: number, rtl: boolean) {
 /**
  * Real meetup footage can replace the drawn film later: pass `video` (a short muted loop, ~6–8 s,
  * 720p WebM/MP4 under ~1.2 MB, plus a poster). Everything else stays the same: it only loads and
- * plays after hydration, never under reduced motion or Save-Data, and pauses off screen, in a
- * hidden tab and from the toggle.
+ * plays after hydration, never under reduced motion or Save-Data, and pauses off screen and in a
+ * hidden tab.
  */
 export type HeroFilmVideo = { src: string; type?: string; poster: string };
 
@@ -158,8 +158,8 @@ export function HeroFilm({ video, variant = "home" }: { video?: HeroFilmVideo; v
     const v = (n: string) => css.getPropertyValue(n).trim();
     const colors = { p: v("--brand-purple"), s: v("--brand-purple-soft"), g: v("--logo-grid"), b: v("--logo-block") };
     const rtl = document.documentElement.dir === "rtl";
+    clearOldPause();
 
-    let paused = readPaused();
     let onScreen = true;
     let raf = 0;
     let last = 0;
@@ -176,7 +176,7 @@ export function HeroFilm({ video, variant = "home" }: { video?: HeroFilmVideo; v
       tick();
     };
     const tick = () => {
-      if (paused || !onScreen || document.hidden) return;
+      if (!onScreen || document.hidden) return;
       if (vid) void vid.play().catch(() => {});
       else if (!raf) raf = requestAnimationFrame(frame);
     };
@@ -202,12 +202,6 @@ export function HeroFilm({ video, variant = "home" }: { video?: HeroFilmVideo; v
     if (cv) ro?.observe(cv);
     const onVis = () => (document.hidden ? stop() : tick());
     document.addEventListener("visibilitychange", onVis);
-    const onToggle = (e: Event) => {
-      paused = (e as CustomEvent<boolean>).detail;
-      if (paused) stop();
-      else tick();
-    };
-    window.addEventListener(EVENT, onToggle);
     tick();
 
     return () => {
@@ -215,7 +209,6 @@ export function HeroFilm({ video, variant = "home" }: { video?: HeroFilmVideo; v
       io.disconnect();
       ro?.disconnect();
       document.removeEventListener("visibilitychange", onVis);
-      window.removeEventListener(EVENT, onToggle);
       document.documentElement.removeAttribute("data-film");
     };
   }, [on]);
@@ -246,44 +239,5 @@ export function HeroFilm({ video, variant = "home" }: { video?: HeroFilmVideo; v
         <canvas ref={canvas} className="absolute inset-0 size-full" />
       )}
     </div>
-  );
-}
-
-/** "Pause background" / "Play background". Hidden under reduced motion, where nothing moves. */
-export function HeroFilmToggle({ pauseLabel, playLabel, className }: { pauseLabel: string; playLabel: string; className?: string }) {
-  const [paused, setPaused] = useState(false);
-  const [gone, setGone] = useState(false); // Save-Data: no film, so no button
-  useEffect(() => {
-    const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- read once after mount: the server can't know
-    setPaused(readPaused());
-    setGone(conn?.saveData === true);
-  }, []);
-  if (gone) return null;
-  const toggle = () => {
-    const next = !paused;
-    setPaused(next);
-    try {
-      localStorage.setItem(KEY, next ? "1" : "0");
-    } catch {}
-    window.dispatchEvent(new CustomEvent(EVENT, { detail: next }));
-  };
-  return (
-    <button
-      type="button"
-      onClick={toggle}
-      data-testid="film-toggle"
-      className={`${className ?? "absolute -bottom-12 end-4 sm:end-8"} inline-flex h-8 items-center gap-2 rounded-full border border-border-strong bg-bg/60 px-3 text-[0.75rem] font-medium text-fg-muted backdrop-blur-sm transition-colors hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-purple motion-reduce:hidden`}
-    >
-      <svg aria-hidden viewBox="0 0 12 12" className="size-3" fill="currentColor">
-        {paused ? <path d="M3 1.5v9l7.5-4.5z" /> : (
-          <>
-            <rect x="2" y="1.5" width="3" height="9" />
-            <rect x="7" y="1.5" width="3" height="9" />
-          </>
-        )}
-      </svg>
-      {paused ? playLabel : pauseLabel}
-    </button>
   );
 }

@@ -14,7 +14,6 @@ import { SeasonSpeakers } from "@/components/events/season-speakers";
 import { ClubFounders } from "@/components/events/club-founders";
 import { ClubAbout } from "@/components/home/club-about";
 import { HeroFaces, seasonSpeakers } from "@/components/home/hero-faces";
-import { HeroFilmToggle } from "@/components/home/hero-film";
 import { authEnabled } from "@/lib/supabase/config";
 
 // ISR: re-render at most every 5 minutes (see PUBLIC_REVALIDATE_SECONDS in config/site.ts;
@@ -57,7 +56,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   return (
     <div className="relative isolate">
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdHtml(orgJsonLd)} />
-      {/* The film itself is the layout's SiteFilm (one canvas per page); its pause button stays here. */}
+      {/* The film itself is the layout's SiteFilm (one canvas per page), with no pause button (26.11). */}
       {/* Before the hero paints: mark a member's browser, so their layout is there from the first paint (no jump). */}
       {!showSchedule && <script dangerouslySetInnerHTML={{ __html: MEMBER_HINT_SCRIPT }} />}
 
@@ -65,7 +64,6 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           "relative mx-auto grid max-w-site gap-7 px-4 pt-6 sm:px-8 lg:items-end lg:gap-14 lg:pt-16",
           (showSchedule || faces) && "lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]",
         )}>
-        <HeroFilmToggle pauseLabel={t("filmPause")} playLabel={t("filmPlay")} />
         <section aria-labelledby="hero-heading">
           <h1
             id="hero-heading"
