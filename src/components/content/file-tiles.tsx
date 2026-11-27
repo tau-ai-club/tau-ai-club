@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from "react";
+import { Fragment, type ComponentType, type ReactNode } from "react";
 import type { EventFile } from "@/lib/content/sections";
 import { cn } from "@/lib/utils";
 
@@ -111,6 +111,22 @@ export function FileTiles({ files, locale, t, LessonLink }: { files: readonly Ti
   );
 }
 
+/**
+ * A title with a break chance after each "_", "-", "." or "/". A file uploaded with no title shows
+ * its file name ("AI_Past_and_Future_Shay_Yahal.pdf"), which has no spaces; without these it ran
+ * out of the tile on a phone. The title span also wraps anywhere as a last resort, so even one long
+ * word stays inside the tile, and the full name is still there to read (nothing is cut).
+ */
+function breakable(title: string): ReactNode {
+  const parts = title.split(/(?<=[_\-./])/);
+  return parts.length < 2 ? title : parts.map((p, i) => (
+    <Fragment key={i}>
+      {i > 0 && <wbr />}
+      {p}
+    </Fragment>
+  ));
+}
+
 function FileTile({ file, title, locale, t, LessonLink }: { file: TileFile; title: string; locale: string; t: T; LessonLink: LinkLike }) {
   const kind = kindOf(file);
   const copy = isPptx(file) ? { ...COPY.slides, meta: "fileMetaSlidesPptx" as const, name: "downloadSlidesPptx" as const } : COPY[kind];
@@ -134,7 +150,7 @@ function FileTile({ file, title, locale, t, LessonLink }: { file: TileFile; titl
       <span className="flex min-w-0 items-center gap-4">
         <FileKindIcon kind={kind} />
         <span className="grid min-w-0 gap-1">
-          <span className="text-[1.1875rem] leading-tight font-semibold break-words text-fg">{title}</span>
+          <span className="min-w-0 text-[1.1875rem] leading-tight font-semibold wrap-anywhere text-fg">{breakable(title)}</span>
           <span className={cn("text-sm", lesson ? "text-brand-purple-soft" : "text-fg-subtle")}>{t(copy.meta)}</span>
         </span>
       </span>

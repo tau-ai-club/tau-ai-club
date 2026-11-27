@@ -148,3 +148,42 @@ for (const locale of ["he", "en"] as const) {
     expect(await noSidewaysScroll(page)).toBe(true);
   });
 }
+
+// A file uploaded with no title shows its file name: one long word with no spaces (prod, lesson 1,
+// iPhone at 390). It must wrap inside its tile, not run off the screen. Two files of one kind
+// (zero-to-hero-2 has two summaries) are two tiles, both shown.
+const LONG: TileFile[] = [
+  { id: "66666666-6666-4666-8666-666666666666", title_he: "AI_Past_and_Future_Shay_Yahal.pdf", title_en: "AI_Past_and_Future_Shay_Yahal.pdf", kind: "pdf", category: "summary" },
+  { id: "77777777-7777-4777-8777-777777777777", title_he: "Averyveryverylongfilenamewithnobreakchanceatallanywhere2026.pdf", title_en: "Averyveryverylongfilenamewithnobreakchanceatallanywhere2026.pdf", kind: "pdf", category: "summary" },
+  { id: "88888888-8888-4888-8888-888888888888", title_he: "סיכום ההרצאה", title_en: "Talk summary", kind: "pdf" },
+];
+for (const locale of ["he", "en"] as const) {
+  for (const width of [360, 390]) {
+    test(`${locale} ${width}: a long file name with no spaces wraps inside its tile; every summary shows`, async ({ page }, info) => {
+      test.skip(info.project.name !== "mobile", "phone widths only");
+      await page.setViewportSize({ width, height: 844 });
+      const tiles = await place(page, locale, LONG);
+      const items = tiles.locator(":scope > li");
+      await expect(items).toHaveCount(3);
+      expect(await items.evaluateAll((els) => els.map((e) => e.getAttribute("data-kind")))).toEqual(["summary", "summary", "summary"]);
+      for (let i = 0; i < 3; i++) {
+        const link = items.nth(i).getByRole("link");
+        // The whole name is still there, to read and to hear.
+        await expect(link).toContainText((locale === "he" ? LONG[i].title_he : LONG[i].title_en).slice(-12));
+        // Nothing inside the tile reaches past its edges, and the tile fits the screen.
+        const out = await link.evaluate((a) => {
+          const r = a.getBoundingClientRect();
+          const bad = [...a.querySelectorAll("span")].filter((s) => {
+            const b = s.getBoundingClientRect();
+            return b.width > 0 && !s.matches("[aria-hidden]") && (b.left < r.left - 1 || b.right > r.right + 1);
+          });
+          return { bad: bad.length, left: r.left, right: r.right, vw: window.innerWidth };
+        });
+        expect(out.bad).toBe(0);
+        expect(out.left).toBeGreaterThanOrEqual(0);
+        expect(out.right).toBeLessThanOrEqual(out.vw);
+      }
+      expect(await noSidewaysScroll(page)).toBe(true);
+    });
+  }
+}
